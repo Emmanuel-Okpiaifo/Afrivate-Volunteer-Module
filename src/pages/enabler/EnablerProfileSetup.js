@@ -13,7 +13,6 @@ const EnablerProfileSetup = () => {
     // Step 1: Setup Profile
     profilePicture: null,
     bio: "",
-    
     // Step 2: Personal Information
     name: "",
     country: "",
@@ -21,13 +20,37 @@ const EnablerProfileSetup = () => {
     state: "",
     phoneNumber: "",
     address: "",
-    
     // Step 3: Business Info
     website: "",
     employees: "",
     role: "",
     document: null
   });
+
+  // Load existing enabler profile from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('enablerProfile');
+      if (saved) {
+        const profile = JSON.parse(saved);
+        setFormData(prev => ({
+          ...prev,
+          bio: profile.bio ?? prev.bio,
+          name: profile.name ?? prev.name,
+          country: profile.country ?? prev.country,
+          email: profile.email ?? prev.email,
+          state: profile.state ?? prev.state,
+          phoneNumber: profile.phoneNumber ?? prev.phoneNumber,
+          address: profile.address ?? prev.address,
+          website: profile.website ?? prev.website,
+          employees: profile.employees ?? prev.employees,
+          role: profile.role ?? prev.role,
+        }));
+      }
+    } catch (e) {
+      console.error('Error loading enabler profile from localStorage:', e);
+    }
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -51,9 +74,10 @@ const EnablerProfileSetup = () => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Save profile data
+      // Save profile data (omit File/Blob so localStorage stays valid)
+      const { profilePicture, document: doc, ...rest } = formData;
       const profileData = {
-        ...formData,
+        ...rest,
         profileComplete: true,
         createdAt: new Date().toISOString()
       };

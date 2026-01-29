@@ -47,15 +47,15 @@ const DashF = () => {
           <div className="   mr-[5%]">
           <ul className="p-4 space-y-5 text-sm  text-black font-medium font-sans">
 
-          <Link to="/" > <li className="bg-white  w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 m-3"><i class="fas fa-house pr-4 pl-2 m-2"></i>
+          <Link to="/" > <li className="bg-white  w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 m-3"><i className="fas fa-house pr-4 pl-2 m-2"></i>
           Home</li></Link>
           <Link to="/community" > <li className="bg-white  w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 m-3"><i className="fas fa-users pr-4 pl-2 m-2"></i>
           Community</li></Link>
           <Link to="/road" > <li className="bg-white  w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 m-3"><i className="fas fa-school pr-4 pl-2 m-2"></i>
          Learning</li></Link>
-          <Link to="#" > <li className="bg-white  w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 m-3"><i class="fas fa-dollar-sign pr-4 pl-2 m-2"></i>
+          <Link to="/pathf" > <li className="bg-white  w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 m-3"><i className="fas fa-dollar-sign pr-4 pl-2 m-2"></i>
           Wallet</li></Link>
-          <Link to="#" > <li className="bg-white  w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 m-3"><i class="fas fa-wrench pr-4 pl-2 m-2"></i>
+          <Link to="/pathf" > <li className="bg-white  w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 m-3"><i className="fas fa-wrench pr-4 pl-2 m-2"></i>
           Settings</li></Link>
           <Link to="/discover" > <li className="flex bg-white  w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 m-3">
           <img src={Aiicon} alt="Ai" className="flex w-[15px] h-[15px] ml-4 mr-5 " />

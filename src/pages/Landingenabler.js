@@ -32,7 +32,7 @@ const Landingenabler = () => {
         </div>
         <div className="hidden sm:hidden md:hidden lg:block w-[65%]">
           <div className="flex flex-wrap justify-center lg:text-base font-semibold items-center gap-4 sm:gap-6 md:gap-10 lg:gap-20 mx-[15%] pt-2">
-            <Link to="/signup" className="transition-all">Volunteering</Link>
+            <Link to="/enabler/opportunities-posted" className="transition-all">Volunteering</Link>
             <Link to="/community" className="nav-link transition-all">Contact us</Link>
             <Link to="/road" className="nav-link transition-all">About us</Link>
           </div>
@@ -47,8 +47,8 @@ const Landingenabler = () => {
             <Link to="/enabler/dashboard"><li className="bg-white/10 backdrop-blur-lg border border-white/20 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5"><i className="fa-solid fa-house pr-4 pl-2 m-2"></i>Dashboard</li></Link>
             <Link to="/community"><li className="bg-[#6A00B11A] backdrop-blur-xl border border-white/20 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5 block lg:hidden"><i className="fa-solid fa-phone pr-4 pl-2 m-2"></i>Contact Us</li></Link>
             <Link to="/road"><li className="bg-[#6A00B11A] backdrop-blur-xl border border-white/20 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5 block lg:hidden"><i className="fas fa-users pr-4 pl-2 m-2"></i>About Us</li></Link>
-            <Link to="/signup"><li className="bg-white/10 backdrop-blur-lg border border-white/20 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5"><i className="fa-solid fa-bookmark pr-4 pl-2 m-2"></i>Bookmarks</li></Link>
-            <Link to="/signup"><li className="bg-white/10 backdrop-blur-lg border border-white/20 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5"><i className="fa-solid fa-gear pr-4 pl-2 m-2"></i>Settings</li></Link>
+            <Link to="/enabler/recommendations"><li className="bg-white/10 backdrop-blur-lg border border-white/20 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5"><i className="fa-solid fa-bookmark pr-4 pl-2 m-2"></i>Bookmarks</li></Link>
+            <Link to="/enabler/settings"><li className="bg-white/10 backdrop-blur-lg border border-white/20 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5"><i className="fa-solid fa-gear pr-4 pl-2 m-2"></i>Settings</li></Link>
           </ul>
         </div>
         <Link to="/login"><button className="w-[80%] bg-[transparent] mt-[30px] mb-3 text-white text-lg  py-4 rounded-xl px-4 mx-3 ml-[5%] border border-white">Sign up</button></Link>
@@ -69,7 +69,7 @@ const Landingenabler = () => {
             <input type="text" className="ml-2 bg-transparent md:text-xl text-sm outline-none text-white placeholder-white w-full font-montserrat h-[30px] md:ml-[2%]" placeholder='Search for an Opportunity' />
             <button className='md:w-[8%] w-[20%] h-[45px] md:h-[50px] rounded-full border border-white/30 bg-white/10 backdrop-blur-base shadow-[inset_0_0_6px_rgba(255,255,255,0.35) hover:shadow-lg hover:shadow-purple-500/40 transition-all duration-300'><i className="fa-solid fa-arrow-right text-white text-3xl"></i></button>
           </div>
-          <Link to="/signup"><button className="md:w-[33%] ml-[2.5%] w-[95%] md:py-6 py-4 font-montserrat text-base md:rounded-2xl rounded-full bg-[radial-gradient(circle_at_center,#56008F,#A839F2,#D390FF)] md:text-lg text-white  shadow-md  hover:bg-purple-700 transition font-extrabold">Post an Opportunity</button></Link>
+          <Link to="/create-opportunity"><button className="md:w-[33%] ml-[2.5%] w-[95%] md:py-6 py-4 font-montserrat text-base md:rounded-2xl rounded-full bg-[radial-gradient(circle_at_center,#56008F,#A839F2,#D390FF)] md:text-lg text-white  shadow-md  hover:bg-purple-700 transition font-extrabold">Post an Opportunity</button></Link>
         </div>
       </main>
 
@@ -130,7 +130,7 @@ const Landingenabler = () => {
       <div className=" relative h-100 bg-gradient-to-br from-[#8500DE] via-[#1F0133] via-[#6A00B1] to-[#000000] rounded-[40PX] md:w-[54%] w-[95%] ml-[2.5%]  md:ml-[23%] mt-20   font-montserrat md:p-14 p-5 text-center">
         <p className='text-2xl sm:text-3xl font-extrabold text-white'>Ready to Make an Impact?</p>
         <p className='md:text-xl text-xs font-base text-white md:mt-4 mt-5'>Join Hundreds of Organizations in<br className='hidden md:block'/> finding their next generation of<br className='hidden md:block'/> leaders on Afrivate </p>
-        <button className="md:px-[100px] px-4 md:mt-10 mt-5 py-3 font-montserrat rounded-2xl border-[2px] border-white text-[#6A00B1] text-lg sm:text-xl font-extrabold bg-white   font-bold  transition">Post an Opportunity</button>
+        <Link to="/create-opportunity"><button className="md:px-[100px] px-4 md:mt-10 mt-5 py-3 font-montserrat rounded-2xl border-[2px] border-white text-[#6A00B1] text-lg sm:text-xl font-extrabold bg-white   font-bold  transition">Post an Opportunity</button></Link>
       </div>
 
       <header className="w-full bg-[#f3f3f3] px-[100px] py-6 mt-[200px] lg:px-[100px] md:px-10 px-6">
@@ -149,8 +149,8 @@ const Landingenabler = () => {
           <p className="text-xs text-[#6A00B1] font-montserrat whitespace-nowrap  text-ellipsis">© Afrivate 2026 — Elevating Life in Africa</p>
           <div className="flex items-center gap-7 text-[#6A00B1] text-2xl">
             <i className="fa-brands fa-x-twitter"></i>
-            <a href="#" aria-label="LinkedIn"><i className="fa-brands fa-linkedin-in"></i></a>
-            <a href="#" aria-label="Instagram"><i className="fa-brands fa-instagram"></i></a>
+            <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i className="fa-brands fa-linkedin-in"></i></a>
+            <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i className="fa-brands fa-instagram"></i></a>
           </div>
         </div>
       </header>

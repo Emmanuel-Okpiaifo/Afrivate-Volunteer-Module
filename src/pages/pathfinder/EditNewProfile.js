@@ -23,6 +23,30 @@ const EditNewProfile = () => {
   const [education, setEducation] = useState([]);
   const [certifications, setCertifications] = useState([]);
 
+  // Load existing profile from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('userProfile');
+      if (saved) {
+        const profile = JSON.parse(saved);
+        setFormData(prev => ({
+          ...prev,
+          displayName: profile.displayName ?? prev.displayName,
+          title: profile.title ?? prev.title,
+          location: profile.location ?? prev.location,
+          languages: profile.languages ?? prev.languages,
+          about: profile.about ?? prev.about,
+          workExperience: profile.workExperience ?? prev.workExperience,
+        }));
+        if (Array.isArray(profile.skills)) setSkills(profile.skills);
+        if (Array.isArray(profile.education)) setEducation(profile.education);
+        if (Array.isArray(profile.certifications)) setCertifications(profile.certifications);
+      }
+    } catch (e) {
+      console.error('Error loading profile from localStorage:', e);
+    }
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({

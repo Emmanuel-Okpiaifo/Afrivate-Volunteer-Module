@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import EnablerNavbar from "../../components/auth/EnablerNavbar";
 
+const DEFAULT_APPLICANT_FILTERS = ["Software Developer", "Video Editor", "Data Analyst"];
+
 const Applicants = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -54,12 +56,18 @@ const Applicants = () => {
     }
   ];
 
-  // Filter applicants by selected opportunity
-  const filteredApplicants = allApplicants.filter(applicant => 
+  const filteredApplicants = allApplicants.filter(applicant =>
     applicant.opportunity === activeFilter
   );
 
-  const opportunityFilters = ["Software Developer", "Video Editor", "Data Analyst"];
+  const [opportunityFilters, setOpportunityFilters] = useState(DEFAULT_APPLICANT_FILTERS);
+  useEffect(() => {
+    try {
+      const opps = JSON.parse(localStorage.getItem("enablerOpportunities") || "[]");
+      const titles = opps.map((o) => o.title).filter(Boolean);
+      setOpportunityFilters([...new Set([...titles, ...DEFAULT_APPLICANT_FILTERS])]);
+    } catch (_) {}
+  }, []);
 
   return (
     <div className="min-h-screen bg-white font-sans">

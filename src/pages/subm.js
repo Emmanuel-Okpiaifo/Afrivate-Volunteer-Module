@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import NavBar from "../components/auth/Navbar";
 import Union from "../Assets/Union.png";
+import Toast from "../components/common/Toast";
+
+const PAYMENTS_KEY = "subscriptionPayments";
 
 const SubscriptionManagement = () => {
-  // Mock database (payment history)
-  const payments = [
+  const defaultPayments = [
     {
       date: "June 10, 2024",
       description: "Premium Plan Renewal",
@@ -43,6 +45,15 @@ const SubscriptionManagement = () => {
   ];
 
   const [search, setSearch] = useState("");
+  const [payments, setPayments] = useState(defaultPayments);
+  const [toast, setToast] = useState({ isOpen: false, message: "", type: "success" });
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(PAYMENTS_KEY);
+      if (saved) setPayments(JSON.parse(saved));
+    } catch (_) {}
+  }, []);
 
   const filteredPayments = payments.filter((payment) =>
     payment.description.toLowerCase().includes(search.toLowerCase())
@@ -72,10 +83,16 @@ const SubscriptionManagement = () => {
               Renews on <span className="font-medium">July 15, 2024</span>
             </p>
             <div className="flex flex-wrap gap-3">
-              <button className="bg-[#6A00B1] text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700 transition-all">
+              <button
+                onClick={() => setToast({ isOpen: true, message: "Upgrade request received. We'll be in touch.", type: "success" })}
+                className="bg-[#6A00B1] text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700 transition-all"
+              >
                 Upgrade Plan
               </button>
-              <button className="bg-purple-100 text-purple-600 px-4 py-2 rounded-lg text-sm hover:bg-purple-200 transition-all">
+              <button
+                onClick={() => setToast({ isOpen: true, message: "Cancel request submitted. Your plan will end at the current period.", type: "info" })}
+                className="bg-purple-100 text-purple-600 px-4 py-2 rounded-lg text-sm hover:bg-purple-200 transition-all"
+              >
                 Cancel Plan
               </button>
             </div>
@@ -131,7 +148,19 @@ const SubscriptionManagement = () => {
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <button className="bg-purple-100 text-purple-600 px-3 py-1 rounded-md text-xs sm:text-sm font-medium hover:bg-purple-200 transition-all">
+                      <button
+                        onClick={() => {
+                          const blob = new Blob([`Invoice ${payment.invoice}\nDate: ${payment.date}\nDescription: ${payment.description}\nAmount: ${payment.amount}\nStatus: ${payment.status}`], { type: "text/plain" });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = url;
+                          a.download = `invoice-${payment.invoice}.txt`;
+                          a.click();
+                          URL.revokeObjectURL(url);
+                          setToast({ isOpen: true, message: "Download started.", type: "success" });
+                        }}
+                        className="bg-purple-100 text-purple-600 px-3 py-1 rounded-md text-xs sm:text-sm font-medium hover:bg-purple-200 transition-all"
+                      >
                         Download
                       </button>
                     </td>
@@ -142,6 +171,7 @@ const SubscriptionManagement = () => {
           </div>
         </div>
       </div>
+      <Toast isOpen={toast.isOpen} message={toast.message} type={toast.type} onClose={() => setToast({ isOpen: false, message: "", type: "success" })} />
     </div>
   );
 };

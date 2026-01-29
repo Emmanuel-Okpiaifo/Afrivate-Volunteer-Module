@@ -1,40 +1,74 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EnablerNavbar from "../../components/auth/EnablerNavbar";
 
+const defaultCompanyData = {
+  name: "TECH INNOVATORS",
+  logo: "",
+  description: "Driving innovation in the tech sector, empowering youth through education and employment opportunities.",
+  details: {
+    industry: "Technology",
+    size: "50-200 employees",
+    founded: "2015",
+    location: "New York, USA",
+  },
+  website: "www.techinnovators.org",
+  about: {
+    mission: "To bridge the gap between talent and opportunity, fostering a diverse and inclusive workforce.",
+    values: "Integrity, Innovation, Collaboration, Impact",
+    sector: "Technology & Education",
+  },
+  employerBrand: "At Tech Innovators Inc., we believe in nurturing talent and providing a platform for growth.",
+  badges: [
+    { name: "Afrivate-certified", icon: "fa-shield" },
+    { name: "CSR-verified", icon: "fa-trophy" },
+  ],
+  impactMetrics: {
+    volunteersHosted: 150,
+    jobsOffered: 75,
+  },
+};
+
+function buildCompanyDataFromEnablerProfile(profile) {
+  if (!profile || !profile.name) return defaultCompanyData;
+  return {
+    name: (profile.name || defaultCompanyData.name).toUpperCase(),
+    logo: profile.profilePictureDataUrl || "",
+    description: profile.bio || defaultCompanyData.description,
+    details: {
+      industry: profile.role || defaultCompanyData.details.industry,
+      size: profile.employees ? `${profile.employees} employees` : defaultCompanyData.details.size,
+      founded: profile.createdAt ? new Date(profile.createdAt).getFullYear().toString() : defaultCompanyData.details.founded,
+      location: [profile.address, profile.state, profile.country].filter(Boolean).join(", ") || defaultCompanyData.details.location,
+    },
+    website: profile.website || defaultCompanyData.website,
+    about: {
+      mission: profile.bio || defaultCompanyData.about.mission,
+      values: defaultCompanyData.about.values,
+      sector: profile.role || defaultCompanyData.about.sector,
+    },
+    employerBrand: profile.bio || defaultCompanyData.employerBrand,
+    badges: defaultCompanyData.badges,
+    impactMetrics: defaultCompanyData.impactMetrics,
+  };
+}
+
 const EnablerProfile = () => {
   const navigate = useNavigate();
+  const [companyData, setCompanyData] = useState(defaultCompanyData);
 
   useEffect(() => {
     document.title = "Enabler Profile - AfriVate";
+    try {
+      const saved = localStorage.getItem("enablerProfile");
+      if (saved) {
+        const profile = JSON.parse(saved);
+        setCompanyData(buildCompanyDataFromEnablerProfile(profile));
+      }
+    } catch (e) {
+      console.error("Error loading enabler profile:", e);
+    }
   }, []);
-
-  const companyData = {
-    name: "TECH INNOVATORS",
-    logo: "", // Placeholder for logo
-    description: "Driving innovation in the tech sector, empowering youth through education and employment opportunities.",
-    details: {
-      industry: "Technology",
-      size: "50-200 employees",
-      founded: "2015",
-      location: "New York, USA",
-    },
-    website: "www.techinnovators.org",
-    about: {
-      mission: "To bridge the gap between talent and opportunity, fostering a diverse and inclusive workforce.",
-      values: "Integrity, Innovation, Collaboration, Impact",
-      sector: "Technology & Education",
-    },
-    employerBrand: "At Tech Innovators Inc., we believe in nurturing talent and providing a platform for growth. Our culture is built on collaboration, innovation, and a commitment to making a positive impact on society. We offer a dynamic work environment with opportunities for professional development and personal fulfillment.",
-    badges: [
-      { name: "Afrivate-certified", icon: "fa-shield" },
-      { name: "CSR-verified", icon: "fa-trophy" },
-    ],
-    impactMetrics: {
-      volunteersHosted: 150,
-      jobsOffered: 75,
-    },
-  };
 
   return (
     <div className="min-h-screen bg-white font-sans">
@@ -55,8 +89,12 @@ const EnablerProfile = () => {
           {/* Profile Header Section */}
           <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-6 mb-8">
             {/* Company Logo */}
-            <div className="w-20 h-20 md:w-24 md:h-24 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center flex-shrink-0">
-              <div className="w-12 h-12 bg-black rounded"></div>
+            <div className="w-20 h-20 md:w-24 md:h-24 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+              {companyData.logo ? (
+                <img src={companyData.logo} alt="Company" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-12 h-12 bg-black rounded"></div>
+              )}
             </div>
 
             {/* Company Info */}

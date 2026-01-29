@@ -3,36 +3,11 @@ import { useNavigate } from "react-router-dom";
 import NavBar from '../../components/auth/Navbar';
 
 const opportunitiesDB = [
-  {
-    id: 1,
-    title: "Software Engineer",
-    company: "Tech Startup-Remote",
-    button: "Apply",
-  },
-  {
-    id: 2,
-    title: "Hardware Engineer",
-    company: "Local NGO-Acccra",
-    button: "Apply",
-  },
-  {
-    id: 3,
-    title: "Cloud Engineer",
-    company: "Tech Startup-Remote",
-    button: "Apply",
-  },
-  {
-    id: 4,
-    title: "UI/UX Designer",
-    company: "Local NGO-Remote",
-    button: "Apply",
-  },
-  {
-    id: 5,
-    title: "Web Developer",
-    company: "Tech Startup-Remote",
-    button: "Apply",
-  },
+  { id: "1", title: "Software Engineer", company: "Tech Startup-Remote", type: "Volunteering", location: "Remote", button: "Apply" },
+  { id: "2", title: "Hardware Engineer", company: "Local NGO-Accra", type: "Volunteering", location: "Accra, Ghana", button: "Apply" },
+  { id: "3", title: "Cloud Engineer", company: "Tech Startup-Remote", type: "Volunteering", location: "Remote", button: "Apply" },
+  { id: "4", title: "UI/UX Designer", company: "Local NGO-Remote", type: "Volunteering", location: "Remote", button: "Apply" },
+  { id: "5", title: "Web Developer", company: "Tech Startup-Remote", type: "Volunteering", location: "Remote", button: "Apply" },
 ];
 
 const Opportunity = () => {
@@ -41,6 +16,13 @@ const Opportunity = () => {
 
   useEffect(() => {
     document.title = "Opportunities - AfriVate";
+    try {
+      const q = sessionStorage.getItem("discoverQuery");
+      if (q) {
+        setSearch(q);
+        sessionStorage.removeItem("discoverQuery");
+      }
+    } catch (_) {}
   }, []);
 
   const filteredList = opportunitiesDB.filter((item) => {
@@ -99,7 +81,7 @@ const Opportunity = () => {
 
                 {/* Right - Apply Button */}
                 <button 
-                  onClick={() => navigate('/volunteer-details')}
+                  onClick={() => navigate('/volunteer-details', { state: { job: item } })}
                   className="bg-[#6A00B1] text-white px-4 py-1.5 rounded-lg text-xs font-medium hover:bg-[#5A0091] transition-colors flex-shrink-0 whitespace-nowrap"
                 >
                   {item.button}

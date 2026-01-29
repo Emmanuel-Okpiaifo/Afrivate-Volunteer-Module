@@ -4,6 +4,10 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { HashRouter } from "react-router-dom";
+import { seedLocalStorage } from './utils/seedLocalStorage';
+
+// Seed localStorage with realistic placeholders before app mounts (so all routes have test data)
+seedLocalStorage();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

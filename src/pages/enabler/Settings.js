@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import EnablerNavbar from "../../components/auth/EnablerNavbar";
 import Modal from "../../components/common/Modal";
@@ -6,10 +6,12 @@ import Toast from "../../components/common/Toast";
 
 const Settings = () => {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     document.title = "Enabler Settings - AfriVate";
   }, []);
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -20,10 +22,35 @@ const Settings = () => {
     bio: "",
     website: "",
   });
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState("");
+  const [companyName, setCompanyName] = useState("TECH INNOVATORS");
   const [editingField, setEditingField] = useState(null);
   const [tempValues, setTempValues] = useState({});
   const [deleteModal, setDeleteModal] = useState({ isOpen: false });
   const [toast, setToast] = useState({ isOpen: false, message: "", type: "success" });
+
+  // Load enabler profile from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("enablerProfile");
+      if (saved) {
+        const profile = JSON.parse(saved);
+        setFormData((prev) => ({
+          ...prev,
+          fullName: profile.name ?? prev.fullName,
+          email: profile.email ?? prev.email,
+          phoneNumber: profile.phoneNumber ?? prev.phoneNumber,
+          location: profile.address ?? prev.location,
+          bio: profile.bio ?? prev.bio,
+          website: profile.website ?? prev.website,
+        }));
+        setProfilePhotoUrl(profile.profilePictureDataUrl || "");
+        setCompanyName((profile.name || "TECH INNOVATORS").toUpperCase());
+      }
+    } catch (e) {
+      console.error("Error loading enabler profile:", e);
+    }
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -54,9 +81,34 @@ const Settings = () => {
     setTempValues({});
   };
 
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = () => setProfilePhotoUrl(reader.result);
+    reader.readAsDataURL(file);
+  };
+
   const handleSave = () => {
-    // Save logic here
-    setToast({ isOpen: true, message: "Changes saved successfully!", type: "success" });
+    try {
+      const existing = JSON.parse(localStorage.getItem("enablerProfile") || "{}");
+      const updated = {
+        ...existing,
+        name: formData.fullName.trim() || existing.name,
+        email: formData.email.trim() || existing.email,
+        phoneNumber: formData.phoneNumber.trim() || existing.phoneNumber,
+        address: formData.location.trim() || existing.address,
+        website: formData.website.trim() || existing.website,
+        bio: formData.bio.trim() || existing.bio,
+        profilePictureDataUrl: profilePhotoUrl || existing.profilePictureDataUrl,
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem("enablerProfile", JSON.stringify(updated));
+      setCompanyName((updated.name || "TECH INNOVATORS").toUpperCase());
+      setToast({ isOpen: true, message: "Changes saved successfully!", type: "success" });
+    } catch (e) {
+      setToast({ isOpen: true, message: "Failed to save. Try again.", type: "error" });
+    }
   };
 
   const handleCancel = () => {
@@ -110,10 +162,25 @@ const Settings = () => {
           <div className="flex flex-col md:flex-row gap-6 mb-8">
             {/* Logo Section */}
             <div className="flex flex-col items-center md:items-start">
-              <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center mb-4">
-                <i className="fa fa-building text-2xl text-gray-400"></i>
+              <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center mb-4 overflow-hidden flex-shrink-0">
+                {profilePhotoUrl ? (
+                  <img src={profilePhotoUrl} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <i className="fa fa-building text-2xl text-gray-400"></i>
+                )}
               </div>
-              <button className="bg-[#6A00B1] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#5A0091] transition-colors">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="bg-[#6A00B1] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#5A0091] transition-colors"
+              >
                 Edit Photo
               </button>
             </div>
@@ -121,7 +188,7 @@ const Settings = () => {
             {/* Company Info */}
             <div className="flex-1 space-y-4">
               <h1 className="text-2xl md:text-3xl font-bold text-black">
-                TECH INNOVATORS
+                {companyName}
               </h1>
               
               {/* Edit Bio */}

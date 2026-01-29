@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Profile_pic from '../../Assets/Ellipse 148.png';
 import Aiicon from '../../Assets/Vector (2).png';
 
 const NavBar = () => {
@@ -76,12 +75,12 @@ const NavBar = () => {
                 <i className="fas fa-school"></i> Learning
               </li>
             </Link>
-            <Link to="#">
+            <Link to="/pathf">
               <li className="bg-white py-2 px-3 rounded-xl hover:bg-gray-300 flex items-center gap-3 m-2">
                 <i className="fas fa-dollar-sign"></i> Wallet
               </li>
             </Link>
-            <Link to="#">
+            <Link to="/pathf">
               <li className="bg-white py-2 px-3 rounded-xl hover:bg-gray-300 flex items-center gap-3 m-2">
                 <i className="fas fa-wrench"></i> Settings
               </li>

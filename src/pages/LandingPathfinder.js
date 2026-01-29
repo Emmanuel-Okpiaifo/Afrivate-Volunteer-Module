@@ -76,11 +76,11 @@ const LandingPathfinder = () => {
         <div className="mr-[5%]">
           <ul className="p-4 space-y-5 text-sm text-white font-medium font-montserrat">
             <Link to="/opportunity"><li className="bg-white/10 backdrop-blur-lg border border-white/20 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5 block lg:hidden"><i className="fas fa-grip-horizontal pr-4 pl-2 m-2"></i>Volunteering</li></Link>
-            <Link to="/signup"><li className="bg-white/10 backdrop-blur-lg border border-white/20 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5"><i className="fa-solid fa-house pr-4 pl-2 m-2"></i>Dashboard</li></Link>
+            <Link to="/pathf"><li className="bg-white/10 backdrop-blur-lg border border-white/20 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5"><i className="fa-solid fa-house pr-4 pl-2 m-2"></i>Dashboard</li></Link>
             <Link to="/community"><li className="bg-[#6A00B11A] backdrop-blur-xl border border-white/20 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5 block lg:hidden"><i className="fa-solid fa-phone pr-4 pl-2 m-2"></i>Contact Us</li></Link>
             <Link to="/road"><li className="bg-[#6A00B11A] backdrop-blur-xl border border-white/20 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5 block lg:hidden"><i className="fas fa-users pr-4 pl-2 m-2"></i>About Us</li></Link>
             <Link to="/bookmarks"><li className="bg-white/10 backdrop-blur-lg border border-white/20 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5"><i className="fa-solid fa-bookmark pr-4 pl-2 m-2"></i>Bookmarks</li></Link>
-            <Link to="/signup"><li className="bg-white/10 backdrop-blur-lg border border-white/20 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5"><i className="fa-solid fa-gear pr-4 pl-2 m-2"></i>Settings</li></Link>
+            <Link to="/pathf"><li className="bg-white/10 backdrop-blur-lg border border-white/20 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5"><i className="fa-solid fa-gear pr-4 pl-2 m-2"></i>Settings</li></Link>
           </ul>
         </div>
         <Link to="/login"><button className="w-[80%] bg-[transparent] mt-[30px] mb-3 text-white text-lg  py-4 rounded-xl px-4 mx-3 ml-[5%] border border-white">Sign up</button></Link>
@@ -101,7 +101,7 @@ const LandingPathfinder = () => {
             <input type="text" className="ml-2 bg-transparent md:text-xl text-sm outline-none text-white placeholder-white w-full font-montserrat h-[30px] md:ml-[2%]" placeholder='Search for an Opportunity' />
             <button className='md:w-[8%] w-[20%] h-[45px] md:h-[50px] rounded-full border border-white/30 bg-white/10 backdrop-blur-base shadow-[inset_0_0_6px_rgba(255,255,255,0.35) hover:shadow-lg hover:shadow-purple-500/40 transition-all duration-300'><i className="fa-solid fa-arrow-right text-white text-3xl"></i></button>
           </div>
-          <Link to="/signup"><button className="md:w-[33%] ml-[2.5%] w-[95%] md:py-6 py-4 font-montserrat text-base md:rounded-3xl rounded-2xl bg-[radial-gradient(circle_at_center,#56008F,#A839F2,#D390FF)] md:text-lg text-white  shadow-md  hover:bg-purple-700 transition font-extrabold">Find Opportunities</button></Link>
+          <Link to="/opportunity"><button className="md:w-[33%] ml-[2.5%] w-[95%] md:py-6 py-4 font-montserrat text-base md:rounded-3xl rounded-2xl bg-[radial-gradient(circle_at_center,#56008F,#A839F2,#D390FF)] md:text-lg text-white  shadow-md  hover:bg-purple-700 transition font-extrabold">Find Opportunities</button></Link>
         </div>
       </main>
 
@@ -172,8 +172,10 @@ const LandingPathfinder = () => {
           <p className="text-xs text-[#6A00B1] font-montserrat whitespace-nowrap  text-ellipsis">© Afrivate 2024 — Elevating Life In Africa</p>
           <div className="flex items-center gap-7 text-[#6A00B1] text-2xl">
             <i className="fa-brands fa-x-twitter"></i>
-            <a href="#" aria-label="LinkedIn"><i className="fa-brands fa-linkedin-in"></i></a>
-            <a href="#" aria-label="Instagram"><i className="fa-brands fa-instagram"></i></a>
+            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+            <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i className="fa-brands fa-linkedin-in"></i></a>
+            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+            <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i className="fa-brands fa-instagram"></i></a>
           </div>
         </div>
       </header>

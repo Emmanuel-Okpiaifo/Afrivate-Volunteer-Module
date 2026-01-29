@@ -53,9 +53,9 @@ const Bookmarks = () => {
     localStorage.setItem('bookmarkedJobs', JSON.stringify(updatedIds));
   };
 
-  // Navigate to job details
-  const handleApply = (jobId) => {
-    navigate('/volunteer-details');
+  // Navigate to job details with job data so VolunteerDetails can display it
+  const handleViewDetails = (job) => {
+    navigate('/volunteer-details', { state: { job } });
   };
 
   return (
@@ -118,10 +118,10 @@ const Bookmarks = () => {
                   {/* Right - Actions */}
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => handleApply(job.id)}
+                      onClick={() => handleViewDetails(job)}
                       className="bg-[#6A00B1] text-white px-4 py-1.5 rounded-lg text-xs font-medium hover:bg-[#5A0091] transition-colors whitespace-nowrap"
                     >
-                      Apply
+                      View Details
                     </button>
                     <button
                       onClick={() => handleRemoveBookmark(job.id)}

@@ -1,17 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import logoImg from '../Assets/Vector (1).png';
 import vector11 from '../Assets/Vector 11.png';
 import vector12 from '../Assets/Vector 12.png';
 import vector13 from '../Assets/Vector 13.png';
-import airob from '../Assets/AI rob.png';
-import airob1 from '../Assets/AI rob (1).png';
 import star1 from '../Assets/Star 1.png';
-import robb from '../Assets/image 11 (2).png';
-import money from '../Assets/image 12.png';
-import generate from '../Assets/Generated.png';
-import vid from '../Assets/STQ6.png';
 import how from '../Assets/How It Works.png';
 import phone from '../Assets/Generated Image November 09, 2025 - 10_10PM 1 (1).png';
 import work from '../Assets/grok-video-c21e1147-f3e2-4f09-8f81-a2f331dfa3e0 1.png';
@@ -26,28 +20,14 @@ import vector from '../Assets/Vector (8).png';
 import work2 from '../Assets/grok-video-8e5d6500-b97c-46c4-b804-b4a643565470 2.png';
 import work3 from '../Assets/grok-video-90f255da-353b-4aad-a543-dbad3a8ca126 1.png';
 
-import whatsappIcon from '../Assets/img/Group.png';
-import instagramIcon from '../Assets/img/Group (1).png';
-
 const Landing = () => {
   const [isOpen, setIsOpen] = useState(false);
-
-  const renderStars = (rating) => {
-    return Array.from({ length: rating }, (_, i) => (
-      <span key={i}>⭐</span>
-    ));
-  };
+  const navigate = useNavigate();
 
   const jobs = [
-    { title: "Product Designer", company: "Paystack", location: "Lagos, Nigeria", button: "View Details", image: work },
-    { title: "AI/ML Engineer", company: "Apple", location: "Cape Town, SA", button: "View Details", image: work2 },
-    { title: "Mobile Developer", company: "Dell", location: "Nairobi, Kenya", button: "View Details", image: work3 },
-  ];
-
-  const courses = [
-    { title: "Creative Designing", school: "University of Bordeaux", rating: 4.5, button: "Get" },
-    { title: "Video Editing", school: "University of Connecticut", rating: 4.5, button: "Get" },
-    { title: "Web Development", school: "MIT", rating: 5, button: "Get" },
+    { id: 'landing-1', title: "Product Designer", company: "Paystack", location: "Lagos, Nigeria", type: "Volunteering", button: "View Details", image: work },
+    { id: 'landing-2', title: "AI/ML Engineer", company: "Apple", location: "Cape Town, SA", type: "Volunteering", button: "View Details", image: work2 },
+    { id: 'landing-3', title: "Mobile Developer", company: "Dell", location: "Nairobi, Kenya", type: "Volunteering", button: "View Details", image: work3 },
   ];
 
   return (
@@ -77,7 +57,7 @@ const Landing = () => {
         </div>
         <div className="hidden sm:hidden md:hidden lg:flex lg:flex-1 lg:items-center lg:justify-center lg:min-w-0 shrink-0">
           <div className="flex flex-wrap justify-center lg:text-base font-semibold items-center gap-4 sm:gap-6 md:gap-10 lg:gap-8 xl:gap-12 pt-2">
-            <Link to="/signup" className="transition-all whitespace-nowrap">Volunteering</Link>
+            <Link to="/opportunity" className="transition-all whitespace-nowrap">Volunteering</Link>
             <Link to="/community" className="nav-link transition-all whitespace-nowrap">Contact us</Link>
             <Link to="/road" className="nav-link transition-all whitespace-nowrap">About us</Link>
           </div>
@@ -87,12 +67,12 @@ const Landing = () => {
       <div className={`fixed top-0 left-0 h-full w-[270px] rounded-tr-3xl rounded-br-3xl bg-[#6A00B1]/40 backdrop-blur-xl border border-white/40 shadow-2xl z-50 transform transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="mr-[5%]">
           <ul className="p-4 space-y-5 text-sm text-white font-medium font-montserrat">
-            <Link to="/signup"><li className="bg-white/20 backdrop-blur-lg border border-white/30 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5 block lg:hidden"><i className="fas fa-grip-horizontal pr-4 pl-2 m-2"></i>Volunteering</li></Link>
-            <Link to="/signup"><li className="bg-white/20 backdrop-blur-lg border border-white/30 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5"><i className="fa-solid fa-house pr-4 pl-2 m-2"></i>Dashboard</li></Link>
+            <Link to="/opportunity"><li className="bg-white/20 backdrop-blur-lg border border-white/30 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5 block lg:hidden"><i className="fas fa-grip-horizontal pr-4 pl-2 m-2"></i>Volunteering</li></Link>
+            <Link to="/pathf"><li className="bg-white/20 backdrop-blur-lg border border-white/30 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5"><i className="fa-solid fa-house pr-4 pl-2 m-2"></i>Dashboard</li></Link>
             <Link to="/community"><li className="bg-[#6A00B1]/30 backdrop-blur-xl border border-white/30 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5 block lg:hidden"><i className="fa-solid fa-phone pr-4 pl-2 m-2"></i>Contact Us</li></Link>
             <Link to="/road"><li className="bg-[#6A00B1]/30 backdrop-blur-xl border border-white/30 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5 block lg:hidden"><i className="fas fa-users pr-4 pl-2 m-2"></i>About Us</li></Link>
-            <Link to="/signup"><li className="bg-white/20 backdrop-blur-lg border border-white/30 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5"><i className="fa-solid fa-bookmark pr-4 pl-2 m-2"></i>Bookmarks</li></Link>
-            <Link to="/signup"><li className="bg-white/20 backdrop-blur-lg border border-white/30 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5"><i className="fa-solid fa-gear pr-4 pl-2 m-2"></i>Settings</li></Link>
+            <Link to="/bookmarks"><li className="bg-white/20 backdrop-blur-lg border border-white/30 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5"><i className="fa-solid fa-bookmark pr-4 pl-2 m-2"></i>Bookmarks</li></Link>
+            <Link to="/pathf"><li className="bg-white/20 backdrop-blur-lg border border-white/30 w-[100%] py-2 pr-4 pl-1 rounded-xl hover:bg-gray-300 mt-5"><i className="fa-solid fa-gear pr-4 pl-2 m-2"></i>Settings</li></Link>
           </ul>
         </div>
         <Link to="/login"><button className="w-[80%] bg-white/15 backdrop-blur border border-white/50 mt-[30px] mb-3 text-white text-sm md:text-lg py-2.5 md:py-4 rounded-xl px-4 mx-3 ml-[5%]">Sign up</button></Link>
@@ -159,7 +139,7 @@ const Landing = () => {
                   <i className="fa-solid fa-location-dot text-[10px] md:text-base"></i><span>{job.location}</span>
                 </div>
               </div>
-              <button className="w-[85%] ml-[7.5%] md:ml-0 md:w-[307px] md:h-[69px] md:mx-auto md:flex md:items-center md:justify-center bg-[#6A00B1] text-white py-1.5 md:py-5 md:px-20 rounded-lg md:rounded-[20px] mt-2 md:mt-auto mb-2 md:mb-0 text-xs md:text-2xl md:leading-[29px] font-semibold md:font-bold">{job.button}</button>
+              <button onClick={() => navigate('/volunteer-details', { state: { job } })} className="w-[85%] ml-[7.5%] md:ml-0 md:w-[307px] md:h-[69px] md:mx-auto md:flex md:items-center md:justify-center bg-[#6A00B1] text-white py-1.5 md:py-5 md:px-20 rounded-lg md:rounded-[20px] mt-2 md:mt-auto mb-2 md:mb-0 text-xs md:text-2xl md:leading-[29px] font-semibold md:font-bold">{job.button}</button>
             </div>
           ))}
         </div>
@@ -213,7 +193,7 @@ const Landing = () => {
       <div className="relative h-auto bg-gradient-to-br from-[#8500DE] via-[#1F0133] via-[#6A00B1] to-[#000000] rounded-2xl md:rounded-[40px] md:w-[64%] w-[95%] ml-[2.5%] md:ml-[18%] mt-8 md:mt-20 font-montserrat md:p-14 p-4 text-center">
         <p className='md:text-4xl text-lg font-extrabold text-white'>Ready to Start Your Journey?</p>
         <p className='md:text-xl text-[11px] font-base text-white md:mt-4 mt-2'>Join a Growing community of change-makers and<br className='hidden md:block'/> innovators across Africa. Your next opportunity is just a click<br className='hidden md:block'/>away.</p>
-        <button className="md:px-[130px] px-6 md:mt-10 mt-3 py-2 md:py-3 font-montserrat rounded-xl md:rounded-2xl border-2 border-white text-[#6A00B1] text-sm md:text-2xl font-extrabold bg-white font-bold transition">Create Account</button>
+        <Link to="/signup"><button className="md:px-[130px] px-6 md:mt-10 mt-3 py-2 md:py-3 font-montserrat rounded-xl md:rounded-2xl border-2 border-white text-[#6A00B1] text-sm md:text-2xl font-extrabold bg-white font-bold transition">Create Account</button></Link>
       </div>
       <div className='flex bg-[#0A990033] items-center w-[95%] md:w-[55%] ml-[2.5%] md:ml-[22.5%] md:mt-[30px] mt-3 rounded-full h-[35px] md:h-[70px] px-2 md:px-10'>
         <img className='w-[5%] md:w-[6%]' src={badge} alt='badge' />
@@ -251,8 +231,8 @@ const Landing = () => {
           <p className="text-[10px] md:text-xs text-[#6A00B1] font-montserrat whitespace-nowrap text-ellipsis">© Afrivate 2026 — Elevating Life in Africa</p>
           <div className="flex items-center gap-4 md:gap-7 text-[#6A00B1] text-base md:text-2xl">
             <i className="fa-brands fa-x-twitter"></i>
-            <a href="#" aria-label="LinkedIn"><i className="fa-brands fa-linkedin-in"></i></a>
-            <a href="#" aria-label="Instagram"><i className="fa-brands fa-instagram"></i></a>
+            <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i className="fa-brands fa-linkedin-in"></i></a>
+            <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i className="fa-brands fa-instagram"></i></a>
           </div>
         </div>
       </header>

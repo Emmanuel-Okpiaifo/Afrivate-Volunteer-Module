@@ -1,7 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import NavBar from '../components/auth/Navbar';
+
+const JOINED_COMMUNITIES_KEY = 'joinedCommunities';
+
 export default function Community() {
   const [openFilter, setOpenFilter] = useState(null)
+  const [searchInput, setSearchInput] = useState('')
+  const [joined, setJoined] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(JOINED_COMMUNITIES_KEY) || '{}');
+    } catch (_) { return {}; }
+  });
   const [selected, setSelected] = useState({
     Category: 'Category',
     Activity: 'Activity',
@@ -70,7 +79,20 @@ export default function Community() {
       cta: 'Join',
       variant: 'primary',
     },
-  ]
+  ];
+
+  const toggleJoin = (title) => {
+    const next = { ...joined, [title]: !joined[title] };
+    setJoined(next);
+    localStorage.setItem(JOINED_COMMUNITIES_KEY, JSON.stringify(next));
+  };
+
+  const filteredCards = cards.filter(
+    (c) =>
+      !searchInput.trim() ||
+      c.title.toLowerCase().includes(searchInput.toLowerCase()) ||
+      c.desc.toLowerCase().includes(searchInput.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-[#F7F7FA] text-[#0F0122]">
@@ -93,6 +115,8 @@ export default function Community() {
             <input
               type="text"
               placeholder="Search"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="w-full rounded-full border border-black/10 bg-white pl-10 pr-4 py-3 text-sm sm:text-base outline-none focus:ring-2 focus:ring-[var(--af-purple)]"
             />
           </div>
@@ -136,27 +160,37 @@ export default function Community() {
         {/* Cards */}
         {/* Cards */}
       <section className="mt-6 sm:mt-8 pb-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {cards.map((c, idx) => (
-          <article key={idx} className="rounded-2xl border border-black/10 bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-            <div className="h-32 rounded-xl bg-black/5" />
-            <div className="mt-4">
-              <h3 className="text-sm font-bold">{c.title}</h3>
-              <p className="mt-1 text-xs text-black/60 leading-relaxed">{c.desc}</p>
-              <p className="mt-1 text-[11px] text-black/50">{c.members}</p>
-            </div>
-            <div className="mt-4">
-              {c.cta === 'Join' ? (
-                <button className="w-full py-2 text-sm font-extrabold rounded-xl bg-[#6A00B1] text-white">
-                  {c.cta}
-                </button>
-              ) : (
-                <button className="w-full py-2 text-sm font-extrabold rounded-xl bg-[color:rgba(106,0,177,0.08)] text-[color:var(--af-purple)]">
-                  {c.cta}
-                </button>
-              )}
-            </div>
-          </article>
-        ))}
+        {filteredCards.map((c, idx) => {
+          const isJoined = joined[c.title];
+          const label = isJoined ? 'Joined' : c.cta;
+          return (
+            <article key={idx} className="rounded-2xl border border-black/10 bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+              <div className="h-32 rounded-xl bg-black/5" />
+              <div className="mt-4">
+                <h3 className="text-sm font-bold">{c.title}</h3>
+                <p className="mt-1 text-xs text-black/60 leading-relaxed">{c.desc}</p>
+                <p className="mt-1 text-[11px] text-black/50">{c.members}</p>
+              </div>
+              <div className="mt-4">
+                {c.cta === 'Join' ? (
+                  <button
+                    onClick={() => toggleJoin(c.title)}
+                    className={`w-full py-2 text-sm font-extrabold rounded-xl ${isJoined ? 'bg-[color:rgba(106,0,177,0.2)] text-[color:var(--af-purple)]' : 'bg-[#6A00B1] text-white'}`}
+                  >
+                    {label}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => toggleJoin(c.title)}
+                    className={`w-full py-2 text-sm font-extrabold rounded-xl ${isJoined ? 'bg-[color:rgba(106,0,177,0.2)] text-[color:var(--af-purple)]' : 'bg-[color:rgba(106,0,177,0.08)] text-[color:var(--af-purple)]'}`}
+                  >
+                    {label}
+                  </button>
+                )}
+              </div>
+            </article>
+          );
+        })}
       </section>
 
       </main>

@@ -113,7 +113,9 @@ const KYCForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateStep()) {
-      console.log('KYC Form submitted:', formData);
+      try {
+        localStorage.setItem('kycFormData', JSON.stringify({ ...formData, submittedAt: new Date().toISOString() }));
+      } catch (_) {}
       navigate('/dashboard');
     }
   };

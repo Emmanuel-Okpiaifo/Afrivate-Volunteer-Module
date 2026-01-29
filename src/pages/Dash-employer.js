@@ -37,11 +37,11 @@ const DashE = () => {
 
           <ul className="p-4 space-y-5 text-sm text-black font-medium font-sans">
             <Link to="/"><li className="bg-white py-2 px-3 rounded-xl hover:bg-gray-300 flex items-center gap-3 m-2"><i className="fas fa-house"></i> Home</li></Link>
-            <Link to="#"><li className="bg-white py-2 px-3 rounded-xl hover:bg-gray-300 flex items-center gap-3 m-2"><i className="fas fa-users"></i> Community</li></Link>
-            <Link to="#"><li className="bg-white py-2 px-3 rounded-xl hover:bg-gray-300 flex items-center gap-3 m-2"><i className="fas fa-school"></i> Learning</li></Link>
-            <Link to="#"><li className="bg-white py-2 px-3 rounded-xl hover:bg-gray-300 flex items-center gap-3 m-2"><i className="fas fa-dollar-sign"></i> Wallet</li></Link>
-            <Link to="#"><li className="bg-white py-2 px-3 rounded-xl hover:bg-gray-300 flex items-center gap-3 m-2"><i className="fas fa-wrench"></i> Settings</li></Link>
-            <Link to="#"><li className="bg-white py-2 px-3 rounded-xl hover:bg-gray-300 flex items-center gap-3"><img src={Aiicon} alt="Ai" className="w-[15px] h-[15px]" /> AI Assistant</li></Link>
+            <Link to="/community"><li className="bg-white py-2 px-3 rounded-xl hover:bg-gray-300 flex items-center gap-3 m-2"><i className="fas fa-users"></i> Community</li></Link>
+            <Link to="/road"><li className="bg-white py-2 px-3 rounded-xl hover:bg-gray-300 flex items-center gap-3 m-2"><i className="fas fa-school"></i> Learning</li></Link>
+            <Link to="/subm"><li className="bg-white py-2 px-3 rounded-xl hover:bg-gray-300 flex items-center gap-3 m-2"><i className="fas fa-dollar-sign"></i> Wallet</li></Link>
+            <Link to="/enabler/settings"><li className="bg-white py-2 px-3 rounded-xl hover:bg-gray-300 flex items-center gap-3 m-2"><i className="fas fa-wrench"></i> Settings</li></Link>
+            <Link to="/discover"><li className="bg-white py-2 px-3 rounded-xl hover:bg-gray-300 flex items-center gap-3"><img src={Aiicon} alt="Ai" className="w-[15px] h-[15px]" /> AI Assistant</li></Link>
           </ul>
 
           <Link to="/login"><button className="w-[80%] bg-purple-900 mt-10 mb-3 text-white text-sm font-extrabold py-3 rounded-xl mx-auto block">Log in</button></Link>
@@ -57,7 +57,7 @@ const DashE = () => {
         </div>
         <div className="flex gap-3 md:ml-auto">
           <Link to="/create-opportunity"><button className="bg-[#6A00B1] p-3 rounded-2xl text-white font-sans text-sm"><i className="fa-solid fa-plus font-bold"></i> New Posting</button></Link>
-          <button className="p-3 border border-[#6A00B1] rounded-2xl text-[#6A00B1] font-sans text-sm">View Profile</button>
+          <Link to="/enabler/profile"><button className="p-3 border border-[#6A00B1] rounded-2xl text-[#6A00B1] font-sans text-sm">View Profile</button></Link>
         </div>
       </div>
 
@@ -89,7 +89,11 @@ const DashE = () => {
                   <td className="py-4 px-4">{job.applications}</td>
                   <td className="py-4 px-4"><span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(job.status)}`}>● {job.status}</span></td>
                   <td className="py-4 px-4 text-gray-600">{job.date}</td>
-                  <td className="py-4 px-4"><button className="bg-purple-700 hover:bg-purple-800 text-white text-xs px-4 py-1 rounded-lg font-semibold transition-all">View</button></td>
+                  <td className="py-4 px-4">
+                    <Link to={`/enabler/applicants/${job.title.toLowerCase().replace(/\s+/g, '-')}`}>
+                      <button className="bg-purple-700 hover:bg-purple-800 text-white text-xs px-4 py-1 rounded-lg font-semibold transition-all">View</button>
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -1,42 +1,53 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import bgimg1 from '../Assets/Beck logo black 1.png';
 import police from '../Assets/mdi_police-badge.png';
-import badge from '../Assets/streamline-sharp_star-badge-remix.png';
 import NavBar from '../components/auth/Navbar';
 
-export default function CompanyProfile() {
-  // Simulated database
-  const companyData = {
-    name: "TECH INNOVATORS INC",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg",
-    description:
-      "Driving innovation in the tech sector, empowering youth through education and employment opportunities.",
+const defaultCompanyData = {
+  name: "TECH INNOVATORS INC",
+  logo: "",
+  description: "Driving innovation in the tech sector, empowering youth through education and employment opportunities.",
+  details: { industry: "Technology", size: "50–200 employees", founded: "2015", location: "New York, USA" },
+  about: { mission: "To bridge the gap between talent and opportunity.", values: "Integrity, Innovation, Collaboration, Impact", sector: "Technology & Education" },
+  employerBrand: "We believe in nurturing talent and providing a platform for growth.",
+  badges: [{ name: "Afrivate-certified", color: "bg-purple-300 text-purple-800" }, { name: "CSR-verified", color: "bg-purple-300 text-purple-800" }],
+  impactMetrics: { volunteersHosted: 150, jobsOffered: 75 },
+};
+
+function buildFromEnablerProfile(profile) {
+  if (!profile || !profile.name) return defaultCompanyData;
+  return {
+    name: (profile.name || defaultCompanyData.name).toUpperCase(),
+    logo: profile.profilePictureDataUrl || "",
+    description: profile.bio || defaultCompanyData.description,
     details: {
-      industry: "Technology",
-      size: "50–200 employees",
-      founded: "2015",
-      location: "New York, USA",
+      industry: profile.role || defaultCompanyData.details.industry,
+      size: profile.employees ? `${profile.employees} employees` : defaultCompanyData.details.size,
+      founded: profile.createdAt ? new Date(profile.createdAt).getFullYear().toString() : defaultCompanyData.details.founded,
+      location: [profile.address, profile.state, profile.country].filter(Boolean).join(", ") || defaultCompanyData.details.location,
     },
     about: {
-      mission:
-        "To bridge the gap between talent and opportunity, fostering a diverse and inclusive workforce.",
-      values: "Integrity, Innovation, Collaboration, Impact",
-      sector: "Technology & Education",
+      mission: profile.bio || defaultCompanyData.about.mission,
+      values: defaultCompanyData.about.values,
+      sector: profile.role || defaultCompanyData.about.sector,
     },
-    employerBrand: `
-      At Tech Innovators Inc., we believe in nurturing talent and providing a platform for growth.
-      Our culture is built on collaboration, innovation, and a commitment to making a positive impact on society.
-      We offer a dynamic work environment with opportunities for professional development and personal fulfillment.
-    `,
-    badges: [
-      { name: "Afrivate-certified", color: "bg-purple-300 text-purple-800" },
-      { name: "CSR-verified", color: "bg-purple-300 text-purple-800" },
-    ],
-    impactMetrics: {
-      volunteersHosted: 150,
-      jobsOffered: 75,
-    },
+    employerBrand: profile.bio || defaultCompanyData.employerBrand,
+    badges: defaultCompanyData.badges,
+    impactMetrics: defaultCompanyData.impactMetrics,
   };
+}
+
+export default function CompanyProfile() {
+  const navigate = useNavigate();
+  const [companyData, setCompanyData] = useState(defaultCompanyData);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("enablerProfile");
+      if (saved) setCompanyData(buildFromEnablerProfile(JSON.parse(saved)));
+    } catch (_) {}
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 ">
@@ -45,11 +56,11 @@ export default function CompanyProfile() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <div className="flex items-center space-x-4">
-            <img
-              src={bgimg1}
-              alt="logo"
-              className="w-20 h-20 rounded-xl border p-4 w-[15%]"
-            />
+            {companyData.logo ? (
+              <img src={companyData.logo} alt="logo" className="w-20 h-20 rounded-xl border object-cover" />
+            ) : (
+              <img src={bgimg1} alt="logo" className="w-20 h-20 rounded-xl border p-4 w-[15%]" />
+            )}
             <div>
               <h1 className="text-2xl font-semibold text-gray-800">
                 {companyData.name}
@@ -63,7 +74,7 @@ export default function CompanyProfile() {
               </p>
             </div>
           </div>
-          <button className="mt-4 md:mt-0 p-3 py-2 text-sm rounded-lg border border-purple-300 text-purple-700 hover:bg-purple-50 bg-[#B678FF66] font-semibold transition">
+          <button onClick={() => navigate("/enabler/edit-profile")} className="mt-4 md:mt-0 p-3 py-2 text-sm rounded-lg border border-purple-300 text-purple-700 hover:bg-purple-50 bg-[#B678FF66] font-semibold transition">
             ✎ Edit Profile
           </button>
         </div>

@@ -1,50 +1,74 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import NavBar from "../../components/auth/Navbar";
+
+const defaultJob = {
+  id: "default",
+  title: "Software Engineer",
+  company: "Innovate Solutions Inc",
+  type: "Volunteering",
+  location: "Nairobi, Kenya",
+};
 
 const VolunteerDetails = () => {
   const navigate = useNavigate();
-  
-  // Get job ID from URL or use a default (in real app, this would come from route params)
-  const jobId = "software-engineer-innovate-solutions";
-  const jobData = {
-    id: jobId,
-    title: "Software Engineer",
-    company: "Innovate Solutions Inc",
-    type: "Volunteering",
-    location: "Nairobi, Kenya",
-  };
+  const location = useLocation();
+  // Job from navigation state (Opportunity or Bookmarks) or fallback from localStorage / default
+  const [jobData, setJobData] = useState(() => {
+    const stateJob = location.state?.job;
+    if (stateJob && stateJob.id != null) return stateJob;
+    try {
+      const bookmarked = JSON.parse(localStorage.getItem('bookmarkedJobsData') || '[]');
+      if (bookmarked.length > 0) return bookmarked[0];
+    } catch (_) {}
+    return defaultJob;
+  });
 
   useEffect(() => {
     document.title = "Volunteer Details - AfriVate";
   }, []);
 
+  // When location.state changes (e.g. user navigated from Opportunity/Bookmarks), use that job
+  useEffect(() => {
+    const stateJob = location.state?.job;
+    if (stateJob && stateJob.id != null) setJobData(stateJob);
+  }, [location.state]);
+
+  const jobId = jobData.id;
+
   // Load bookmarked status from localStorage
   const [isBookmarked, setIsBookmarked] = useState(() => {
-    const bookmarks = JSON.parse(localStorage.getItem('bookmarkedJobs') || '[]');
-    return bookmarks.includes(jobId);
+    try {
+      const bookmarks = JSON.parse(localStorage.getItem('bookmarkedJobs') || '[]');
+      return bookmarks.some(b => b === jobId || b === String(jobId));
+    } catch (_) { return false; }
   });
+
+  // Re-check bookmark when jobData changes
+  useEffect(() => {
+    try {
+      const bookmarks = JSON.parse(localStorage.getItem('bookmarkedJobs') || '[]');
+      setIsBookmarked(bookmarks.some(b => b === jobId || b === String(jobId)));
+    } catch (_) {}
+  }, [jobId]);
 
   // Save/remove bookmark from localStorage
   const handleBookmarkToggle = () => {
     const bookmarks = JSON.parse(localStorage.getItem('bookmarkedJobs') || '[]');
-    
+    const id = jobId != null ? String(jobId) : jobId;
+
     if (isBookmarked) {
-      // Remove bookmark
-      const updatedBookmarks = bookmarks.filter(id => id !== jobId);
+      const updatedBookmarks = bookmarks.filter(b => b !== id && b !== jobId);
       localStorage.setItem('bookmarkedJobs', JSON.stringify(updatedBookmarks));
-      // Also remove from bookmarkedJobsData
       const bookmarkedJobsData = JSON.parse(localStorage.getItem('bookmarkedJobsData') || '[]');
-      const updatedJobsData = bookmarkedJobsData.filter(job => job.id !== jobId);
+      const updatedJobsData = bookmarkedJobsData.filter(job => String(job.id) !== id && job.id !== jobId);
       localStorage.setItem('bookmarkedJobsData', JSON.stringify(updatedJobsData));
       setIsBookmarked(false);
     } else {
-      // Add bookmark
-      const updatedBookmarks = [...bookmarks, jobId];
+      const updatedBookmarks = [...bookmarks.filter(b => b !== id && b !== jobId), id];
       localStorage.setItem('bookmarkedJobs', JSON.stringify(updatedBookmarks));
-      // Also store full job data for the bookmarks page
       const bookmarkedJobsData = JSON.parse(localStorage.getItem('bookmarkedJobsData') || '[]');
-      const updatedJobsData = [...bookmarkedJobsData.filter(job => job.id !== jobId), jobData];
+      const updatedJobsData = [...bookmarkedJobsData.filter(job => String(job.id) !== id && job.id !== jobId), { ...jobData, id: jobData.id || id }];
       localStorage.setItem('bookmarkedJobsData', JSON.stringify(updatedJobsData));
       setIsBookmarked(true);
     }
@@ -93,10 +117,10 @@ const VolunteerDetails = () => {
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div className="flex-1">
                 <h1 className="text-2xl sm:text-3xl font-bold text-black mb-2">
-                  Software Engineer
+                  {jobData.title}
                 </h1>
                 <p className="text-gray-600 text-base md:text-lg">
-                  Innovate Solutions Inc -Volunteering
+                  {jobData.company} {jobData.type ? `- ${jobData.type}` : '- Volunteering'}
                 </p>
               </div>
               
@@ -267,11 +291,11 @@ const VolunteerDetails = () => {
                 
                 {/* Company Name */}
                 <h3 className="text-lg font-bold text-gray-900 text-center mb-2">
-                  Innovate Solutions Inc.
+                  {jobData.company}
                 </h3>
-                <a href="#" className="text-[#6A00B1] text-sm text-center block mb-5 hover:underline">
+                <Link to="/" className="text-[#6A00B1] text-sm text-center block mb-5 hover:underline">
                   View Company Profile
-                </a>
+                </Link>
 
                 {/* Job Summary */}
                 <div className="border-t border-gray-200 pt-5 space-y-4">
@@ -291,7 +315,7 @@ const VolunteerDetails = () => {
                     <i className="fa fa-map-marker text-[#6A00B1] mt-1"></i>
                     <div>
                       <p className="text-xs text-gray-500 mb-1">Location:</p>
-                      <p className="text-sm font-medium text-gray-900">Nairobi, Kenya</p>
+                      <p className="text-sm font-medium text-gray-900">{jobData.location || 'Not specified'}</p>
                     </div>
                   </div>
                 </div>

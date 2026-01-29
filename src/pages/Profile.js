@@ -1,38 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+
+const PROFILE_STORAGE_KEY = 'appProfile';
+
+const defaultFormData = {
+  firstName: 'John',
+  lastName: 'Doe',
+  email: 'john.doe@example.com',
+  phone: '+1 (555) 123-4567',
+  dateOfBirth: '1990-05-15',
+  nationality: 'United States',
+  address: '123 Main Street',
+  city: 'New York',
+  state: 'NY',
+  zipCode: '10001',
+  country: 'United States',
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: '',
+  twoFactorEnabled: true,
+  emailNotifications: true,
+  smsNotifications: false,
+  language: 'English',
+  timezone: 'UTC-5',
+  currency: 'USD',
+};
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState('personal');
-  const [formData, setFormData] = useState({
-    // Personal Information
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (555) 123-4567',
-    dateOfBirth: '1990-05-15',
-    nationality: 'United States',
-    
-    // Address Information
-    address: '123 Main Street',
-    city: 'New York',
-    state: 'NY',
-    zipCode: '10001',
-    country: 'United States',
-    
-    // Security Settings
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-    twoFactorEnabled: true,
-    emailNotifications: true,
-    smsNotifications: false,
-    
-    // Preferences
-    language: 'English',
-    timezone: 'UTC-5',
-    currency: 'USD'
-  });
+  const [formData, setFormData] = useState(defaultFormData);
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setFormData(prev => ({ ...prev, ...parsed }));
+      }
+    } catch (_) {}
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -88,10 +95,10 @@ const Profile = () => {
 
   const handleSave = () => {
     if (validateForm()) {
-      // Here you would typically make an API call to update the profile
-      console.log('Profile updated:', formData);
-      // Would show toast notification here if component was set up
-      console.log('Profile updated successfully!');
+      const toSave = { ...formData, currentPassword: '', newPassword: '', confirmPassword: '' };
+      try {
+        localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(toSave));
+      } catch (_) {}
     }
   };
 

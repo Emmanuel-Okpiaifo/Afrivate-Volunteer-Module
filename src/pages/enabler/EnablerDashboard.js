@@ -1,12 +1,28 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EnablerNavbar from "../../components/auth/EnablerNavbar";
 
 const EnablerDashboard = () => {
   const navigate = useNavigate();
+  const [opportunities, setOpportunities] = useState([]);
 
   useEffect(() => {
     document.title = "Enabler Dashboard - AfriVate";
+  }, []);
+
+  // Load opportunities from localStorage so dashboard shows real data
+  useEffect(() => {
+    const load = () => {
+      try {
+        const saved = JSON.parse(localStorage.getItem('enablerOpportunities') || '[]');
+        setOpportunities(saved);
+      } catch (_) {
+        setOpportunities([]);
+      }
+    };
+    load();
+    window.addEventListener('storage', load);
+    return () => window.removeEventListener('storage', load);
   }, []);
 
   const analytics = [
@@ -87,6 +103,41 @@ const EnablerDashboard = () => {
               </button>
             </div>
           </div>
+
+          {/* Your opportunities from localStorage */}
+          {opportunities.length > 0 && (
+            <div className="mb-6 md:mb-8">
+              <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-black mb-3 md:mb-4">
+                Your Opportunities
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                {opportunities.slice(0, 4).map((opp) => (
+                  <div
+                    key={opp.id}
+                    className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => navigate(`/enabler/opportunity/${opp.id}`)}
+                  >
+                    <p className="font-semibold text-gray-900 text-sm md:text-base truncate">{opp.title}</p>
+                    <p className="text-gray-600 text-xs md:text-sm mt-1">{opp.company} · {opp.location || '—'}</p>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); navigate(`/enabler/opportunity/${opp.id}`); }}
+                      className="mt-2 text-[#6A00B1] text-xs font-semibold hover:underline"
+                    >
+                      View details →
+                    </button>
+                  </div>
+                ))}
+              </div>
+              {opportunities.length > 4 && (
+                <button
+                  onClick={() => navigate('/enabler/opportunities-posted')}
+                  className="mt-3 text-[#6A00B1] text-sm font-semibold hover:underline"
+                >
+                  View all ({opportunities.length}) opportunities
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Analytics Summary */}
           <div className="mb-6 md:mb-8">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import EnablerNavbar from "../../components/auth/EnablerNavbar";
+import { getPathfinderById } from "../../utils/pathfinderData";
 
 const PathfinderProfile = () => {
   const navigate = useNavigate();
@@ -13,89 +14,23 @@ const PathfinderProfile = () => {
     document.title = "Pathfinder Profile - AfriVate";
   }, []);
 
-  // Sample pathfinder data - in production, this would come from an API
   useEffect(() => {
-    // Sample data based on the recommendations
-    const pathfinderData = {
-      1: {
-        id: 1,
-        name: "John Martins",
-        role: "Non-Profit Manager",
-        location: "Nigeria",
-        languages: "Fluent in English, French",
-        about: "Experienced non-profit professional with a passion for community development and social impact.",
-        skills: ["Management", "Communication", "Leadership"],
-        workExperience: [],
-        education: [],
-        certifications: []
-      },
-      2: {
-        id: 2,
-        name: "John Wick",
-        role: "Youth Development Specialist",
-        location: "Nigeria",
-        languages: "Fluent in English",
-        about: "Dedicated to empowering young people through education and mentorship programs.",
-        skills: ["Community Outreach", "Event Planning", "Fundraising"],
-        workExperience: [],
-        education: [],
-        certifications: []
-      },
-      3: {
-        id: 3,
-        name: "Joshua Komolafe",
-        role: "Fullstack Developer",
-        location: "Nigeria",
-        languages: "Fluent in English, French",
-        about: "I'm a goal-driven developer who pays attention to details and follows up on given instructions.",
-        skills: ["Java Developer", "Frontend Developer", "Backend Developer", "Phyton Developer"],
-        workExperience: [],
-        education: [],
-        certifications: []
-      },
-      4: {
-        id: 4,
-        name: "Jason Williams",
-        role: "Digital Marketing Specialist",
-        location: "Nigeria",
-        languages: "Fluent in English",
-        about: "Creative marketer with expertise in digital campaigns and social media strategy.",
-        skills: ["Content Creation", "Social Media Marketing"],
-        workExperience: [],
-        education: [],
-        certifications: []
-      },
-      5: {
-        id: 5,
-        name: "James Anderson",
-        role: "Policy Analyst",
-        location: "Nigeria",
-        languages: "Fluent in English",
-        about: "Policy expert focused on creating meaningful change through research and advocacy.",
-        skills: ["Research", "Policy Analysis", "Advocacy"],
-        workExperience: [],
-        education: [],
-        certifications: []
-      }
-    };
-
-    const found = pathfinderData[id] || pathfinderData[3]; // Default to Joshua Komolafe
+    const found = getPathfinderById(id);
     setPathfinder(found);
 
-    // Check if bookmarked
     const bookmarked = JSON.parse(localStorage.getItem('bookmarkedPathfinders') || '[]');
-    setIsBookmarked(bookmarked.includes(found.id));
+    setIsBookmarked(bookmarked.includes(found.id) || bookmarked.includes(String(found.id)));
   }, [id]);
 
   const handleBookmark = () => {
     const bookmarked = JSON.parse(localStorage.getItem('bookmarkedPathfinders') || '[]');
     if (isBookmarked) {
-      const updated = bookmarked.filter(bId => bId !== pathfinder.id);
+      const updated = bookmarked.filter(bId => bId !== pathfinder.id && bId !== String(pathfinder.id));
       localStorage.setItem('bookmarkedPathfinders', JSON.stringify(updated));
       setIsBookmarked(false);
     } else {
-      bookmarked.push(pathfinder.id);
-      localStorage.setItem('bookmarkedPathfinders', JSON.stringify(bookmarked));
+      const updated = [...bookmarked.filter(bId => bId !== pathfinder.id && bId !== String(pathfinder.id)), pathfinder.id];
+      localStorage.setItem('bookmarkedPathfinders', JSON.stringify(updated));
       setIsBookmarked(true);
     }
   };

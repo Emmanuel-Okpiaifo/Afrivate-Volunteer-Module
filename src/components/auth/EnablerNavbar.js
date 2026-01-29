@@ -92,6 +92,17 @@ const EnablerNavbar = () => {
               </li>
             </Link>
             
+            <Link to="/enabler/bookmarked-pathfinders" onClick={() => setIsOpen(false)}>
+              <li className={`py-3 px-4 rounded-lg flex items-center gap-3 transition-colors ${
+                isActive('/enabler/bookmarked-pathfinders')
+                  ? 'bg-[#E0C6FF] text-black'
+                  : 'bg-transparent text-black hover:bg-gray-200'
+              }`}>
+                <i className="fas fa-bookmark"></i>
+                <span className="font-medium">Bookmarked Pathfinders</span>
+              </li>
+            </Link>
+            
             <Link to="/enabler/settings" onClick={() => setIsOpen(false)}>
               <li className={`py-3 px-4 rounded-lg flex items-center gap-3 transition-colors ${
                 isActive('/enabler/settings')

@@ -1,7 +1,10 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import vector1Img from '../Assets/img/Vector (1).png'
 import NavBar from '../components/auth/Navbar';
+
 export default function Discover() {
+  const navigate = useNavigate();
   const [query, setQuery] = useState('')
 
   return (
@@ -47,6 +50,10 @@ export default function Discover() {
             />
             <button
               type="button"
+              onClick={() => {
+                if (query.trim()) sessionStorage.setItem('discoverQuery', query.trim());
+                navigate('/opportunity');
+              }}
               className="absolute right-3 bottom-3 rounded-full text-white grid place-items-center transition-transform duration-200 hover:scale-105 active:scale-95 group"
               style={{
                 width: 44,

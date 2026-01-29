@@ -19,11 +19,10 @@ import PathfinderProfile from './pages/enabler/PathfinderProfile';
 import ContactPathfinder from './pages/enabler/ContactPathfinder';
 import Applicants from './pages/enabler/Applicants';
 import EnablerProfileSetup from './pages/enabler/EnablerProfileSetup';
+import EnablerPathfinderBookmarks from './pages/enabler/EnablerPathfinderBookmarks';
 import Landing from './pages/Landing';
 import LandingPathfinder from './pages/LandingPathfinder';
 import Landingenabler from './pages/Landingenabler';
-import DashF from './pages/Dash-freelance';
-import DashE from './pages/Dash-employer';
 import EnablerDashboard from './pages/enabler/EnablerDashboard';
 import Emppro from './pages/emppro';
 import Opportunity from './pages/pathfinder/Opportunity';
@@ -47,7 +46,7 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/landingpathfinder" element={<LandingPathfinder />} />
           <Route path="/landingenabler" element={<Landingenabler />} />
-          <Route path="/dashf" element={<DashF />} />
+          <Route path="/dashf" element={<Pathf />} />
           <Route path="/enabler/dashboard" element={<EnablerDashboard />} />
           <Route path="/emppro" element={<Emppro />} />
           <Route path="/opportunity" element={<Opportunity />} />
@@ -74,6 +73,7 @@ function App() {
           <Route path="/enabler/settings" element={<Settings />} />
           <Route path="/enabler/pathfinder/:id" element={<PathfinderProfile />} />
           <Route path="/enabler/contact/:id" element={<ContactPathfinder />} />
+          <Route path="/enabler/bookmarked-pathfinders" element={<EnablerPathfinderBookmarks />} />
           <Route path="/enabler/applicants/:id" element={<Applicants />} />
           <Route path="/enabler/profile-setup" element={<EnablerProfileSetup />} />
 

@@ -1,29 +1,30 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import NavBar from "../../components/auth/Navbar";
 import Volunteer from '../../Assets/img/pathf/8ea3ad24e25785accacd2be3a0b0dba93082dcd2.jpg';
 
 const PathfinderDashboard = () => {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [displayName, setDisplayName] = useState("Joshua");
 
   useEffect(() => {
     document.title = "Pathfinder Dashboard - AfriVate";
+    try {
+      const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
+      setDisplayName((prev) => {
+        if (profile.displayName) {
+          const first = profile.displayName.split(" ")[0];
+          return first || prev;
+        }
+        return prev;
+      });
+    } catch (_) {}
   }, []);
 
   const recommendedOpportunities = [
-    {
-      id: 1,
-      title: "Software Engineer",
-      type: "Volunteer",
-      location: "New York, USA",
-      button: "Apply",
-    },
-    {
-      id: 2,
-      title: "Product Designer",
-      type: "Volunteer",
-      location: "California, USA",
-      button: "Apply",
-    },
+    { id: "rec-1", title: "Software Engineer", type: "Volunteer", location: "New York, USA", button: "Apply" },
+    { id: "rec-2", title: "Product Designer", type: "Volunteer", location: "California, USA", button: "Apply" },
   ];
 
   const filteredOpportunities = recommendedOpportunities.filter((item) => {
@@ -41,7 +42,7 @@ const PathfinderDashboard = () => {
         {/* Welcome Section */}
         <div className="text-center mt-8 sm:mt-10 mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-[#6A00B1] mb-1">
-            Welcome, Joshua !
+            Welcome, {displayName} !
           </h1>
           <p className="text-base text-[#7E7E7E] font-medium mb-4">
             Let's Find your next opportunity
@@ -73,7 +74,10 @@ const PathfinderDashboard = () => {
                 <p className="text-sm text-[#BDBDBD] font-medium">Active Applications</p>
               </div>
             </div>
-            <button className="bg-[#6A00B1] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-[#5A0091] transition-colors whitespace-nowrap">
+            <button
+              onClick={() => navigate("/opportunity")}
+              className="bg-[#6A00B1] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-[#5A0091] transition-colors whitespace-nowrap"
+            >
               View
             </button>
           </div>
@@ -86,21 +90,16 @@ const PathfinderDashboard = () => {
           </h2>
           
           {/* Volunteering Image Card */}
-          <div className="relative rounded-2xl overflow-hidden w-full mx-auto h-48 sm:h-56 border border-[#E9E9E9]">
-            <img 
-              src={Volunteer} 
-              alt="Volunteering" 
-              className="w-full h-full object-cover"
-            />
+          <button
+            onClick={() => navigate("/opportunity")}
+            className="relative rounded-2xl overflow-hidden w-full mx-auto h-48 sm:h-56 border border-[#E9E9E9] block text-left"
+          >
+            <img src={Volunteer} alt="Volunteering" className="w-full h-full object-cover" />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-              <h3 className="text-lg sm:text-xl font-extrabold text-white mb-0.5">
-                Volunteering
-              </h3>
-              <p className="text-sm text-white/95">
-                Explore volunteering Opportunities
-              </p>
+              <h3 className="text-lg sm:text-xl font-extrabold text-white mb-0.5">Volunteering</h3>
+              <p className="text-sm text-white/95">Explore volunteering Opportunities</p>
             </div>
-          </div>
+          </button>
         </div>
 
         {/* Recommended just for you Section */}
@@ -135,7 +134,10 @@ const PathfinderDashboard = () => {
                 </div>
 
                 {/* Right - Apply Button */}
-                <button className="bg-[#6A00B1] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#5A0091] transition-colors flex-shrink-0 whitespace-nowrap">
+                <button
+                  onClick={() => navigate("/volunteer-details", { state: { job: item } })}
+                  className="bg-[#6A00B1] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#5A0091] transition-colors flex-shrink-0 whitespace-nowrap"
+                >
                   {item.button}
                 </button>
               </div>
