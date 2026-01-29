@@ -1,0 +1,144 @@
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import NavBar from "../../components/auth/Navbar";
+
+const Bookmarks = () => {
+  const navigate = useNavigate();
+  const [bookmarkedJobs, setBookmarkedJobs] = useState([]);
+
+  useEffect(() => {
+    document.title = "Bookmarks - AfriVate";
+  }, []);
+
+  // Load bookmarked jobs from localStorage
+  useEffect(() => {
+    const loadBookmarks = () => {
+      try {
+        const bookmarksData = JSON.parse(localStorage.getItem('bookmarkedJobsData') || '[]');
+        setBookmarkedJobs(bookmarksData);
+      } catch (error) {
+        console.error('Error loading bookmarks:', error);
+        setBookmarkedJobs([]);
+      }
+    };
+
+    loadBookmarks();
+    
+    // Refresh when page gains focus (in case bookmarks were updated on another page)
+    const handleFocus = () => {
+      loadBookmarks();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('storage', loadBookmarks);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('storage', loadBookmarks);
+    };
+  }, []);
+
+  // Remove bookmark
+  const handleRemoveBookmark = (jobId) => {
+    // Remove from bookmarkedJobs array
+    const updatedJobs = bookmarkedJobs.filter(job => job.id !== jobId);
+    setBookmarkedJobs(updatedJobs);
+    
+    // Update localStorage
+    localStorage.setItem('bookmarkedJobsData', JSON.stringify(updatedJobs));
+    
+    // Also update the IDs array
+    const bookmarkedIds = JSON.parse(localStorage.getItem('bookmarkedJobs') || '[]');
+    const updatedIds = bookmarkedIds.filter(id => id !== jobId);
+    localStorage.setItem('bookmarkedJobs', JSON.stringify(updatedIds));
+  };
+
+  // Navigate to job details
+  const handleApply = (jobId) => {
+    navigate('/volunteer-details');
+  };
+
+  return (
+    <div className="min-h-screen bg-white font-sans">
+      <NavBar />
+      
+      {/* Main Content */}
+      <div className="pt-20 px-4 md:px-8 lg:px-12 pb-8">
+        <div className="max-w-3xl mx-auto">
+          {/* Page Title */}
+          <div className="mb-6 mt-4">
+            <h1 className="text-2xl md:text-3xl font-bold text-black mb-1">
+              Bookmarks
+            </h1>
+            <p className="text-gray-600 text-sm md:text-base">
+              View and manage your saved volunteering opportunities
+            </p>
+          </div>
+
+          {/* Bookmarked Jobs List */}
+          {bookmarkedJobs.length === 0 ? (
+            <div className="text-center py-12">
+              <i className="fa fa-bookmark-o text-gray-300 text-4xl mb-4"></i>
+              <p className="text-gray-500 text-lg mb-2">No bookmarked opportunities yet</p>
+              <p className="text-gray-400 text-sm">
+                Start bookmarking opportunities to see them here
+              </p>
+              <button
+                onClick={() => navigate('/opportunity')}
+                className="mt-6 bg-[#6A00B1] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#5A0091] transition-colors"
+              >
+                Browse Opportunities
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {bookmarkedJobs.map((job) => (
+                <div
+                  key={job.id}
+                  className="bg-white border border-gray-200 rounded-lg p-3 flex items-center gap-3 hover:shadow-sm transition-all"
+                >
+                  {/* Left - Circular Placeholder */}
+                  <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0"></div>
+
+                  {/* Center - Job Info */}
+                  <div className="flex-1 min-w-0">
+                    <h2 className="font-bold text-gray-900 text-sm mb-0.5">
+                      {job.title}
+                    </h2>
+                    <p className="text-xs text-gray-500">
+                      {job.company}{job.type ? ` - ${job.type}` : ''}
+                    </p>
+                    {job.location && (
+                      <p className="text-xs text-gray-500">
+                        {job.location}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Right - Actions */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleApply(job.id)}
+                      className="bg-[#6A00B1] text-white px-4 py-1.5 rounded-lg text-xs font-medium hover:bg-[#5A0091] transition-colors whitespace-nowrap"
+                    >
+                      Apply
+                    </button>
+                    <button
+                      onClick={() => handleRemoveBookmark(job.id)}
+                      className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
+                      title="Remove bookmark"
+                    >
+                      <i className="fa fa-times text-lg"></i>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Bookmarks;
