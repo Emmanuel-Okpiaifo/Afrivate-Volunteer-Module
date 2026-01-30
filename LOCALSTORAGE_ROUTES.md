@@ -2,6 +2,8 @@
 
 The app seeds **localStorage** with realistic placeholder data on first load so you can test every feature. Each route below uses at least one localStorage key.
 
+**Backend API:** For production API calls, see **`API_DOCS.md`** (full endpoint reference) and **`src/services/api.js`** (auth, bookmark, profile, notifications, waitlist). **`ROUTES_API_REQUIREMENTS.md`** maps routes to API vs localStorage.
+
 ---
 
 ## How to access this data on the website

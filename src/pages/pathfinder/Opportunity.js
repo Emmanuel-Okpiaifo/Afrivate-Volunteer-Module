@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from '../../components/auth/Navbar';
+import * as api from '../../services/api';
 
-const opportunitiesDB = [
+const FALLBACK_OPPORTUNITIES = [
   { id: "1", title: "Software Engineer", company: "Tech Startup-Remote", type: "Volunteering", location: "Remote", button: "Apply" },
   { id: "2", title: "Hardware Engineer", company: "Local NGO-Accra", type: "Volunteering", location: "Accra, Ghana", button: "Apply" },
   { id: "3", title: "Cloud Engineer", company: "Tech Startup-Remote", type: "Volunteering", location: "Remote", button: "Apply" },
@@ -10,9 +11,46 @@ const opportunitiesDB = [
   { id: "5", title: "Web Developer", company: "Tech Startup-Remote", type: "Volunteering", location: "Remote", button: "Apply" },
 ];
 
+function mapOpportunityFromApi(item) {
+  if (!item) return null;
+  return {
+    id: String(item.id),
+    title: item.title || '',
+    company: item.link || 'Remote',
+    type: 'Volunteering',
+    location: 'Remote',
+    button: 'Apply',
+    _raw: item,
+  };
+}
+
 const Opportunity = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [savedIds, setSavedIds] = useState(new Set());
+
+  const loadOpportunities = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await api.bookmark.opportunitiesList();
+      const arr = Array.isArray(data) ? data.map(mapOpportunityFromApi).filter(Boolean) : [];
+      setList(arr.length ? arr : FALLBACK_OPPORTUNITIES.map((o) => ({ ...o })));
+    } catch (_) {
+      setList(FALLBACK_OPPORTUNITIES.map((o) => ({ ...o })));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadSavedIds = useCallback(async () => {
+    try {
+      const data = await api.bookmark.opportunitiesSavedList();
+      const ids = Array.isArray(data) ? data.map((s) => String(s.opportunity_id ?? s.id)) : [];
+      setSavedIds(new Set(ids));
+    } catch (_) {}
+  }, []);
 
   useEffect(() => {
     document.title = "Opportunities - AfriVate";
@@ -25,10 +63,22 @@ const Opportunity = () => {
     } catch (_) {}
   }, []);
 
-  const filteredList = opportunitiesDB.filter((item) => {
+  useEffect(() => {
+    loadOpportunities();
+    loadSavedIds();
+  }, [loadOpportunities, loadSavedIds]);
+
+  const filteredList = list.filter((item) => {
     return item.title.toLowerCase().includes(search.toLowerCase()) ||
-           item.company.toLowerCase().includes(search.toLowerCase());
+           (item.company || '').toLowerCase().includes(search.toLowerCase());
   });
+
+  const handleSave = async (item) => {
+    try {
+      await api.bookmark.opportunitiesSavedCreate({ opportunity_id: Number(item.id) || item.id });
+      setSavedIds((prev) => new Set([...prev, String(item.id)]));
+    } catch (_) {}
+  };
 
   return (
     <div className="min-h-screen bg-white font-sans">
@@ -60,35 +110,41 @@ const Opportunity = () => {
           </div>
 
           {/* Opportunity Cards */}
-          <div className="flex flex-col gap-2.5">
-            {filteredList.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white border border-gray-200 rounded-lg p-3 flex items-center gap-3 hover:shadow-sm transition-all"
-              >
-                {/* Left - Circular Placeholder */}
-                <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0"></div>
-
-                {/* Center - Job Info */}
-                <div className="flex-1 min-w-0">
-                  <h2 className="font-bold text-gray-900 text-sm mb-0.5">
-                    {item.title}
-                  </h2>
-                  <p className="text-xs text-gray-500">
-                    {item.company}
-                  </p>
-                </div>
-
-                {/* Right - Apply Button */}
-                <button 
-                  onClick={() => navigate('/volunteer-details', { state: { job: item } })}
-                  className="bg-[#6A00B1] text-white px-4 py-1.5 rounded-lg text-xs font-medium hover:bg-[#5A0091] transition-colors flex-shrink-0 whitespace-nowrap"
+          {loading ? (
+            <div className="text-center py-8 text-gray-500">Loading opportunities...</div>
+          ) : (
+            <div className="flex flex-col gap-2.5">
+              {filteredList.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white border border-gray-200 rounded-lg p-3 flex items-center gap-3 hover:shadow-sm transition-all"
                 >
-                  {item.button}
-                </button>
-              </div>
-            ))}
-          </div>
+                  <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0"></div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="font-bold text-gray-900 text-sm mb-0.5">{item.title}</h2>
+                    <p className="text-xs text-gray-500">{item.company}</p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => handleSave(item)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${savedIds.has(String(item.id)) ? 'bg-gray-200 text-gray-600' : 'bg-gray-100 text-[#6A00B1] hover:bg-gray-200'}`}
+                      title={savedIds.has(String(item.id)) ? 'Saved' : 'Save'}
+                    >
+                      {savedIds.has(String(item.id)) ? 'Saved' : 'Save'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/volunteer-details', { state: { job: item } })}
+                      className="bg-[#6A00B1] text-white px-4 py-1.5 rounded-lg text-xs font-medium hover:bg-[#5A0091] transition-colors whitespace-nowrap"
+                    >
+                      {item.button}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Empty State */}

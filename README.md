@@ -56,12 +56,26 @@ cd AfriVate-Project
 npm install
 ```
 
-3. Start the development server
+3. (Optional) **Backend URL**  
+   API calls use the `/api` prefix (e.g. `/api/auth/register/`, `/api/auth/token/`). To use a different host, set in `.env`:
+   ```
+   REACT_APP_API_BASE_URL=https://your-backend-url.com
+   ```
+   (No trailing slash.) The backend must allow your frontend origin (e.g. `https://afrivate.org`, `http://localhost:3000`) in CORS.
+
+4. (Optional) **Google Sign-In**  
+   Create a [Google Cloud OAuth 2.0 Client ID](https://console.cloud.google.com/apis/credentials) (Web application). Add `http://localhost:3000` and your production origin (e.g. `https://afrivate.org`) to Authorized JavaScript origins. Then create a `.env` in the project root:
+   ```
+   REACT_APP_GOOGLE_CLIENT_ID=your_client_id.apps.googleusercontent.com
+   ```
+   The backend must implement `POST /auth/google/` (see `API_DOCS.md`) to exchange the Google id_token for your app’s JWT.
+
+5. Start the development server
 ```bash
 npm start
 ```
 
-4. Build for production
+6. Build for production
 ```bash
 npm run build
 ```

@@ -1,11 +1,34 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import EnablerNavbar from "../../components/auth/EnablerNavbar";
 import Modal from "../../components/common/Modal";
+import * as api from "../../services/api";
+
+function mapApiOpportunity(item) {
+  return {
+    id: String(item.id),
+    title: item.title || '',
+    company: "Tech Innovators",
+    type: "Volunteering",
+    description: item.description || '',
+    responsibilities: [],
+    qualifications: [],
+    aboutCompany: '',
+    applicationInstructions: '',
+    jobType: "Volunteer",
+    location: "Remote",
+    workModel: "Remote",
+    timeCommitment: "",
+    link: item.link,
+    posted_at: item.posted_at,
+    is_open: item.is_open,
+  };
+}
 
 const OpportunitiesPosted = () => {
   const navigate = useNavigate();
   const [opportunities, setOpportunities] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null });
   const [clearAllModal, setClearAllModal] = useState({ isOpen: false });
 
@@ -13,13 +36,18 @@ const OpportunitiesPosted = () => {
     document.title = "Opportunities Posted - AfriVate";
   }, []);
 
-  useEffect(() => {
-    loadOpportunities();
-  }, []);
-
-  const loadOpportunities = () => {
+  const loadOpportunities = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await api.bookmark.opportunitiesList();
+      const arr = Array.isArray(data) ? data.map(mapApiOpportunity) : [];
+      if (arr.length > 0) {
+        setOpportunities(arr);
+        setLoading(false);
+        return;
+      }
+    } catch (_) {}
     const saved = JSON.parse(localStorage.getItem('enablerOpportunities') || '[]');
-    // If no saved opportunities, use sample data with full format
     if (saved.length === 0) {
       const sampleData = [
         {
@@ -140,12 +168,16 @@ const OpportunitiesPosted = () => {
         }
       ];
       setOpportunities(sampleData);
-      // Save sample data to localStorage for consistency
       localStorage.setItem('enablerOpportunities', JSON.stringify(sampleData));
     } else {
       setOpportunities(saved);
     }
-  };
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    loadOpportunities();
+  }, [loadOpportunities]);
 
   const handleDelete = (id) => {
     setDeleteModal({ isOpen: true, id });
@@ -195,7 +227,9 @@ const OpportunitiesPosted = () => {
             )}
           </div>
           
-          {opportunities.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-12 text-gray-500">Loading opportunities...</div>
+          ) : opportunities.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg mb-4">No opportunities posted yet.</p>
               <button

@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
-import Google from '../../../src/Assets/pngwing.com(10) 1.png';
-
-
+import api, { getApiErrorMessage } from '../../services/api';
+import { useUser } from '../../context/UserContext';
+import { GoogleAuthButton } from '../../components/auth/GoogleAuthButton';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { refetchUser } = useUser();
 
   useEffect(() => {
     document.title = "Login - AfriVate";
@@ -50,34 +51,29 @@ const Login = () => {
     setServerError('');
   
     try {
-      const response = await fetch('https://afrivate-backend-test.onrender.com/api/auth/login/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username_or_email: formData.email,
-          password: formData.password,
-        }),
+      const data = await api.auth.token({
+        email: formData.email,
+        password: formData.password,
       });
   
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Login failed');
-      }
-  
-      const data = await response.json();
-      console.log('Login successful:', data);
-  
-      // Save token to localStorage (if backend returns one)
       if (data.access) {
-        localStorage.setItem('token', data.access);
+        api.setTokens(data.access, data.refresh);
+        try {
+          const enabler = await api.profile.enablerGet();
+          if (enabler && enabler.id != null) api.setRole('enabler');
+        } catch (_) {
+          try {
+            const pathfinder = await api.profile.pathfinderGet();
+            if (pathfinder && pathfinder.id != null) api.setRole('pathfinder');
+          } catch (__) {}
+        }
+        await refetchUser();
+        navigate('/pathf');
+      } else {
+        setServerError('Login failed');
       }
-  
-      navigate('/dashf'); // redirect after successful login
     } catch (err) {
-      console.error('Login error:', err.message);
-      setServerError(err.message);
+      setServerError(getApiErrorMessage(err) || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -105,8 +101,13 @@ const Login = () => {
         </div>
       </div>
 
-      <div className="flex bg-white mb-3 w-full  text-[#45005A] font-bold text-lg py-4 rounded-[15px] ">
-      <img src={Google} alt="Google logo" className="w-[22px] h-[22px] mx-4 ml-5 mt-1" /> Login with Google <i class="fas fa-solid fa-arrow-right ml-6 mt-1"></i>
+      <div className="mb-3 w-full">
+        <GoogleAuthButton
+          mode="login"
+          buttonText="Login with Google"
+          onError={setServerError}
+          className="flex justify-center"
+        />
       </div>
 
       <div className="relative mx-2 mb-5">

@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
+import api from '../../services/api';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email) {
       setError('Email is required');
@@ -18,9 +20,17 @@ const ForgotPassword = () => {
       setError('Email is invalid');
       return;
     }
-    // Handle password reset request
-    console.log('Password reset requested for:', email);
-    setIsSubmitted(true);
+    setLoading(true);
+    setError('');
+    try {
+      await api.auth.forgotPassword({ email });
+      sessionStorage.setItem('forgotPasswordEmail', email);
+      setIsSubmitted(true);
+    } catch (err) {
+      setError(err.body?.detail || err.message || 'Request failed. Try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,8 +60,8 @@ const ForgotPassword = () => {
                 error={error}
               />
 
-              <Button type="submit">
-                Send Code
+              <Button type="submit" disabled={loading}>
+                {loading ? 'Sending...' : 'Send Code'}
               </Button>
             </form>
           ) : (

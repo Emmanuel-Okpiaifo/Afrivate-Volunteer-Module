@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import EnablerNavbar from "../../components/auth/EnablerNavbar";
+import * as api from "../../services/api";
 
 const EnablerProfileSetup = () => {
   const navigate = useNavigate();
@@ -70,23 +71,49 @@ const EnablerProfileSetup = () => {
     }
   };
 
-  const handleProceed = () => {
+  const handleProceed = async () => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
-    } else {
-      // Save profile data (omit File/Blob so localStorage stays valid)
-      const { profilePicture, document: doc, ...rest } = formData;
-      const profileData = {
-        ...rest,
-        profileComplete: true,
-        createdAt: new Date().toISOString()
-      };
-      localStorage.setItem('enablerProfile', JSON.stringify(profileData));
-      localStorage.setItem('hasCompletedEnablerProfile', 'true');
-      
-      // Navigate to dashboard
-      navigate('/enabler/dashboard');
+      return;
     }
+    const { profilePicture, document: doc, ...rest } = formData;
+    const profileData = {
+      ...rest,
+      profileComplete: true,
+      createdAt: new Date().toISOString()
+    };
+    localStorage.setItem('enablerProfile', JSON.stringify(profileData));
+    localStorage.setItem('hasCompletedEnablerProfile', 'true');
+
+    try {
+      const base_details = {
+        bio: formData.bio || '',
+        country: formData.country || '',
+        contact_email: formData.email || '',
+        phone_number: formData.phoneNumber || '',
+        website: formData.website || '',
+        address: formData.address || '',
+        city: '',
+        state: formData.state || '',
+      };
+      const body = { name: formData.name || 'Enabler', base_details, social_links: [] };
+      await api.profile.enablerUpdate(body);
+    } catch (_) {
+      try {
+        const base_details = {
+          bio: formData.bio || '',
+          country: formData.country || '',
+          contact_email: formData.email || '',
+          phone_number: formData.phoneNumber || '',
+          website: formData.website || '',
+          address: formData.address || '',
+          city: '',
+          state: formData.state || '',
+        };
+        await api.profile.enablerCreate({ name: formData.name || 'Enabler', base_details, social_links: [] });
+      } catch (__) {}
+    }
+    navigate('/enabler/dashboard');
   };
 
   const canProceed = () => {

@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import * as api from '../services/api';
 
 const UserContext = createContext();
 
@@ -10,81 +11,108 @@ export const useUser = () => {
   return context;
 };
 
+function normalizeEnablerProfile(data) {
+  if (!data) return null;
+  const base = data.base_details || {};
+  return {
+    id: data.id,
+    name: data.name || base.contact_email || 'Enabler',
+    role: 'Enabler',
+    profileCompletion: 75,
+    profileViews: 0,
+    earningsThisMonth: 0,
+    activeProjects: [],
+    recentEarnings: [],
+    raw: data,
+  };
+}
+
+function normalizePathfinderProfile(data) {
+  if (!data) return null;
+  const base = data.base_details || {};
+  const name = [data.first_name, data.last_name].filter(Boolean).join(' ') || base.contact_email || 'Pathfinder';
+  return {
+    id: data.id,
+    name,
+    role: 'Pathfinder',
+    profileCompletion: 75,
+    profileViews: 0,
+    earningsThisMonth: 0,
+    activeProjects: [],
+    recentEarnings: [],
+    raw: data,
+  };
+}
+
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // In a real application, this would be an API call to get user data
-    const fetchUser = async () => {
-      try {
-        // Simulate API call
-        const response = await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve({
-              id: '123',
-              name: 'John Doe',
-              role: 'Frontend Developer',
-              profileCompletion: 75,
-              profileViews: 128,
-              earningsThisMonth: 2500,
-              activeProjects: [
-                {
-                  id: 1,
-                  title: 'E-commerce Website',
-                  client: 'Tech Solutions Ltd',
-                  status: 'In Progress',
-                  dueDate: '2024-03-15'
-                },
-                {
-                  id: 2,
-                  title: 'Mobile App UI',
-                  client: 'Innovation Corp',
-                  status: 'Review',
-                  dueDate: '2024-03-20'
-                }
-              ],
-              recentEarnings: [
-                {
-                  id: 1,
-                  project: 'Brand Design',
-                  amount: 800,
-                  date: '2024-02-28'
-                },
-                {
-                  id: 2,
-                  title: 'Web Development',
-                  amount: 1200,
-                  date: '2024-02-25'
-                }
-              ]
-            });
-          }, 1000);
-        });
-        setUser(response);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      } finally {
-        setLoading(false);
+  const fetchUser = useCallback(async () => {
+    const access = api.getAccessToken();
+    if (!access) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+    try {
+      const role = api.getRole();
+      if (role === 'enabler') {
+        const data = await api.profile.enablerGet();
+        setUser(normalizeEnablerProfile(data));
+        return;
       }
-    };
-
-    fetchUser();
+      if (role === 'pathfinder') {
+        const data = await api.profile.pathfinderGet();
+        setUser(normalizePathfinderProfile(data));
+        return;
+      }
+      try {
+        const enabler = await api.profile.enablerGet();
+        if (enabler && enabler.id != null) {
+          api.setRole('enabler');
+          setUser(normalizeEnablerProfile(enabler));
+          return;
+        }
+      } catch (_) {}
+      try {
+        const pathfinder = await api.profile.pathfinderGet();
+        if (pathfinder && pathfinder.id != null) {
+          api.setRole('pathfinder');
+          setUser(normalizePathfinderProfile(pathfinder));
+          return;
+        }
+      } catch (_) {}
+      setUser(null);
+    } catch (_) {
+      api.clearTokens();
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
   const updateUser = (newData) => {
-    setUser(prev => ({ ...prev, ...newData }));
+    setUser((prev) => (prev ? { ...prev, ...newData } : null));
   };
 
-  const logout = () => {
+  const logout = useCallback(async () => {
+    try {
+      await api.auth.logout();
+    } catch (_) {}
+    api.clearTokens();
     setUser(null);
-  };
+  }, []);
 
   return (
-    <UserContext.Provider value={{ user, loading, updateUser, logout }}>
+    <UserContext.Provider value={{ user, loading, updateUser, logout, refetchUser: fetchUser }}>
       {children}
     </UserContext.Provider>
   );
 };
 
-export default UserContext; 
+export default UserContext;

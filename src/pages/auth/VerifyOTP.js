@@ -1,23 +1,40 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OTPInput from '../../components/auth/OTPInput';
+import api from '../../services/api';
 
 const VerifyOTP = () => {
   const navigate = useNavigate();
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
 
-  const handleOTPComplete = (otp) => {
-    console.log('OTP entered:', otp);
-    // Verify OTP
-    navigate('/reset-password');
+  const email = sessionStorage.getItem('forgotPasswordEmail') || '';
+
+  const handleOTPComplete = async (otp) => {
+    if (!email) {
+      setError('Email missing. Please start from Forgot Password.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      await api.auth.verifyOtp({ email, otp: String(otp) });
+      sessionStorage.setItem('resetPasswordEmail', email);
+      navigate('/reset-password');
+    } catch (err) {
+      setError(err.body?.detail || err.message || 'Invalid OTP. Try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleResend = async () => {
     setError("");
     setIsResending(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      if (email) await api.auth.forgotPassword({ email });
+    } catch (_) {}
     setIsResending(false);
   };
 
@@ -36,8 +53,9 @@ const VerifyOTP = () => {
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <div className="space-y-6">
             <OTPInput
-              length={4}
+              length={6}
               onComplete={handleOTPComplete}
+              disabled={loading}
             />
 
             {error && (

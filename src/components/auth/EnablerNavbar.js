@@ -1,9 +1,18 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useUser } from '../../context/UserContext';
 
 const EnablerNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useUser();
+
+  const handleLogout = () => {
+    setIsOpen(false);
+    logout();
+    navigate('/');
+  };
 
   const isActive = (path) => {
     return location.pathname === path;
@@ -113,6 +122,14 @@ const EnablerNavbar = () => {
                 <span className="font-medium">Settings</span>
               </li>
             </Link>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="w-full text-left py-3 px-4 rounded-lg flex items-center gap-3 transition-colors bg-transparent text-black hover:bg-gray-200"
+            >
+              <i className="fas fa-sign-out-alt"></i>
+              <span className="font-medium">Logout</span>
+            </button>
           </ul>
 
           {/* Post an Opportunity Button */}

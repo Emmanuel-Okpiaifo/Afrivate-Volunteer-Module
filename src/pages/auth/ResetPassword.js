@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
+import api from '../../services/api';
+
+const RESET_EMAIL_KEY = 'resetPasswordEmail';
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -10,6 +13,14 @@ const ResetPassword = () => {
     confirmPassword: ''
   });
   const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!sessionStorage.getItem(RESET_EMAIL_KEY)) {
+      navigate('/forgot-password', { replace: true });
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,9 +28,8 @@ const ResetPassword = () => {
       ...prev,
       [name]: value
     }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
+    setServerError('');
   };
 
   const validateForm = () => {
@@ -36,11 +46,29 @@ const ResetPassword = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log('Password reset:', formData);
-      navigate('/login');
+    if (!validateForm()) return;
+    const email = sessionStorage.getItem(RESET_EMAIL_KEY);
+    if (!email) {
+      navigate('/forgot-password', { replace: true });
+      return;
+    }
+    setLoading(true);
+    setServerError('');
+    try {
+      await api.auth.resetPassword({
+        email,
+        new_password: formData.newPassword,
+        confirm_password: formData.confirmPassword,
+      });
+      sessionStorage.removeItem(RESET_EMAIL_KEY);
+      navigate('/login', { replace: true });
+    } catch (err) {
+      const msg = err.body?.detail || err.body?.message || err.message || 'Password reset failed';
+      setServerError(typeof msg === 'string' ? msg : 'Password reset failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,8 +101,11 @@ const ResetPassword = () => {
               error={errors.confirmPassword}
             />
 
-            <Button type="submit">
-              Reset Password
+            {serverError && (
+              <p className="text-red-500 text-sm text-center">{serverError}</p>
+            )}
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Resetting...' : 'Reset Password'}
             </Button>
           </form>
         </div>

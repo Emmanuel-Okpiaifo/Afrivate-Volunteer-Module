@@ -1,59 +1,75 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../../components/auth/Navbar";
+import * as api from "../../services/api";
+
+function mapSavedToJob(s) {
+  const opp = s.opportunity || {};
+  return {
+    id: opp.id ?? s.opportunity_id ?? s.id,
+    bookmarkId: s.id,
+    title: opp.title || 'Opportunity',
+    company: opp.link || opp.description || 'Remote',
+  };
+}
 
 const Bookmarks = () => {
   const navigate = useNavigate();
   const [bookmarkedJobs, setBookmarkedJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [useApi, setUseApi] = useState(true);
+
+  const loadBookmarks = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await api.bookmark.opportunitiesSavedList();
+      const arr = Array.isArray(data) ? data.map(mapSavedToJob) : [];
+      setBookmarkedJobs(arr);
+      setUseApi(true);
+    } catch (_) {
+      try {
+        const fallback = JSON.parse(localStorage.getItem('bookmarkedJobsData') || '[]');
+        setBookmarkedJobs(Array.isArray(fallback) ? fallback : []);
+      } catch (e) {
+        setBookmarkedJobs([]);
+      }
+      setUseApi(false);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     document.title = "Bookmarks - AfriVate";
   }, []);
 
-  // Load bookmarked jobs from localStorage
   useEffect(() => {
-    const loadBookmarks = () => {
-      try {
-        const bookmarksData = JSON.parse(localStorage.getItem('bookmarkedJobsData') || '[]');
-        setBookmarkedJobs(bookmarksData);
-      } catch (error) {
-        console.error('Error loading bookmarks:', error);
-        setBookmarkedJobs([]);
-      }
-    };
-
     loadBookmarks();
-    
-    // Refresh when page gains focus (in case bookmarks were updated on another page)
-    const handleFocus = () => {
-      loadBookmarks();
-    };
-    
+    const handleFocus = () => loadBookmarks();
     window.addEventListener('focus', handleFocus);
     window.addEventListener('storage', loadBookmarks);
-    
     return () => {
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('storage', loadBookmarks);
     };
-  }, []);
+  }, [loadBookmarks]);
 
-  // Remove bookmark
-  const handleRemoveBookmark = (jobId) => {
-    // Remove from bookmarkedJobs array
-    const updatedJobs = bookmarkedJobs.filter(job => job.id !== jobId);
+  const handleRemoveBookmark = async (job) => {
+    const bookmarkId = job.bookmarkId;
+    if (useApi && bookmarkId != null) {
+      try {
+        await api.bookmark.delete(bookmarkId);
+        setBookmarkedJobs((prev) => prev.filter((j) => j.bookmarkId !== bookmarkId));
+        return;
+      } catch (_) {}
+    }
+    const updatedJobs = bookmarkedJobs.filter((j) => j.id !== job.id && j.bookmarkId !== bookmarkId);
     setBookmarkedJobs(updatedJobs);
-    
-    // Update localStorage
     localStorage.setItem('bookmarkedJobsData', JSON.stringify(updatedJobs));
-    
-    // Also update the IDs array
-    const bookmarkedIds = JSON.parse(localStorage.getItem('bookmarkedJobs') || '[]');
-    const updatedIds = bookmarkedIds.filter(id => id !== jobId);
-    localStorage.setItem('bookmarkedJobs', JSON.stringify(updatedIds));
+    const ids = JSON.parse(localStorage.getItem('bookmarkedJobs') || '[]');
+    localStorage.setItem('bookmarkedJobs', JSON.stringify(ids.filter((id) => id !== String(job.id))));
   };
 
-  // Navigate to job details with job data so VolunteerDetails can display it
   const handleViewDetails = (job) => {
     navigate('/volunteer-details', { state: { job } });
   };
@@ -76,7 +92,9 @@ const Bookmarks = () => {
           </div>
 
           {/* Bookmarked Jobs List */}
-          {bookmarkedJobs.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-12 text-gray-500">Loading bookmarks...</div>
+          ) : bookmarkedJobs.length === 0 ? (
             <div className="text-center py-12">
               <i className="fa fa-bookmark-o text-gray-300 text-4xl mb-4"></i>
               <p className="text-gray-500 text-lg mb-2">No bookmarked opportunities yet</p>
@@ -94,7 +112,7 @@ const Bookmarks = () => {
             <div className="flex flex-col gap-3">
               {bookmarkedJobs.map((job) => (
                 <div
-                  key={job.id}
+                  key={job.bookmarkId ?? job.id}
                   className="bg-white border border-gray-200 rounded-lg p-3 flex items-center gap-3 hover:shadow-sm transition-all"
                 >
                   {/* Left - Circular Placeholder */}
@@ -124,7 +142,7 @@ const Bookmarks = () => {
                       View Details
                     </button>
                     <button
-                      onClick={() => handleRemoveBookmark(job.id)}
+                      onClick={() => handleRemoveBookmark(job)}
                       className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
                       title="Remove bookmark"
                     >

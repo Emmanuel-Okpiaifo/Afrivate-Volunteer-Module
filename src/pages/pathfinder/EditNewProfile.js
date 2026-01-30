@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../../components/auth/Navbar";
+import * as api from "../../services/api";
 
 const EditNewProfile = () => {
   const navigate = useNavigate();
@@ -8,7 +9,7 @@ const EditNewProfile = () => {
   useEffect(() => {
     document.title = "Edit Profile - AfriVate";
   }, []);
-  
+
   const [formData, setFormData] = useState({
     displayName: "",
     title: "",
@@ -23,29 +24,47 @@ const EditNewProfile = () => {
   const [education, setEducation] = useState([]);
   const [certifications, setCertifications] = useState([]);
 
-  // Load existing profile from localStorage on mount
-  useEffect(() => {
+  const loadProfile = useCallback(async () => {
     try {
-      const saved = localStorage.getItem('userProfile');
-      if (saved) {
-        const profile = JSON.parse(saved);
-        setFormData(prev => ({
-          ...prev,
-          displayName: profile.displayName ?? prev.displayName,
-          title: profile.title ?? prev.title,
-          location: profile.location ?? prev.location,
-          languages: profile.languages ?? prev.languages,
-          about: profile.about ?? prev.about,
-          workExperience: profile.workExperience ?? prev.workExperience,
-        }));
-        if (Array.isArray(profile.skills)) setSkills(profile.skills);
-        if (Array.isArray(profile.education)) setEducation(profile.education);
-        if (Array.isArray(profile.certifications)) setCertifications(profile.certifications);
+      const data = await api.profile.pathfinderGet();
+      const base = data.base_details || {};
+      const name = [data.first_name, data.last_name].filter(Boolean).join(' ') || base.contact_email || '';
+      setFormData(prev => ({
+        ...prev,
+        displayName: name || prev.displayName,
+        title: prev.title,
+        location: base.country || base.state || prev.location,
+        languages: prev.languages,
+        about: base.bio ?? prev.about,
+        workExperience: prev.workExperience,
+      }));
+    } catch (_) {
+      try {
+        const saved = localStorage.getItem('userProfile');
+        if (saved) {
+          const profile = JSON.parse(saved);
+          setFormData(prev => ({
+            ...prev,
+            displayName: profile.displayName ?? prev.displayName,
+            title: profile.title ?? prev.title,
+            location: profile.location ?? prev.location,
+            languages: profile.languages ?? prev.languages,
+            about: profile.about ?? prev.about,
+            workExperience: profile.workExperience ?? prev.workExperience,
+          }));
+          if (Array.isArray(profile.skills)) setSkills(profile.skills);
+          if (Array.isArray(profile.education)) setEducation(profile.education);
+          if (Array.isArray(profile.certifications)) setCertifications(profile.certifications);
+        }
+      } catch (e) {
+        console.error('Error loading profile:', e);
       }
-    } catch (e) {
-      console.error('Error loading profile from localStorage:', e);
     }
   }, []);
+
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -55,7 +74,7 @@ const EditNewProfile = () => {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const profileData = {
       ...formData,
       skills,
@@ -63,9 +82,52 @@ const EditNewProfile = () => {
       certifications,
       profileComplete: true
     };
-    
     localStorage.setItem('userProfile', JSON.stringify(profileData));
     localStorage.setItem('hasCompletedProfile', 'true');
+
+    try {
+      const parts = (formData.displayName || '').trim().split(/\s+/);
+      const first_name = parts[0] || 'User';
+      const last_name = parts.slice(1).join(' ') || '';
+      const base_details = {
+        bio: formData.about || '',
+        country: formData.location || '',
+        contact_email: '',
+        phone_number: '',
+        website: '',
+        address: '',
+        city: '',
+        state: '',
+      };
+      await api.profile.pathfinderUpdate({
+        first_name,
+        last_name,
+        base_details,
+        social_links: [],
+      });
+    } catch (_) {
+      try {
+        const parts = (formData.displayName || '').trim().split(/\s+/);
+        const first_name = parts[0] || 'User';
+        const last_name = parts.slice(1).join(' ') || '';
+        const base_details = {
+          bio: formData.about || '',
+          country: formData.location || '',
+          contact_email: '',
+          phone_number: '',
+          website: '',
+          address: '',
+          city: '',
+          state: '',
+        };
+        await api.profile.pathfinderCreate({
+          first_name,
+          last_name,
+          base_details,
+          social_links: [],
+        });
+      } catch (__) {}
+    }
     navigate('/pathf');
   };
 

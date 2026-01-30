@@ -1,9 +1,18 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Aiicon from '../../Assets/Vector (2).png';
+import { useUser } from '../../context/UserContext';
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+  const { user, logout } = useUser();
+
+  const handleLogout = () => {
+    setIsOpen(false);
+    logout();
+    navigate('/');
+  };
 
   return (
     <>
@@ -92,11 +101,21 @@ const NavBar = () => {
             </Link>
           </ul>
 
-          <Link to="/login">
-            <button className="w-[80%] bg-purple-900 mt-10 mb-3 text-white text-sm font-extrabold py-3 rounded-xl mx-auto block">
-              Log in
+          {user ? (
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="w-[80%] bg-purple-900 mt-10 mb-3 text-white text-sm font-extrabold py-3 rounded-xl mx-auto block"
+            >
+              Logout
             </button>
-          </Link>
+          ) : (
+            <Link to="/login">
+              <button type="button" className="w-[80%] bg-purple-900 mt-10 mb-3 text-white text-sm font-extrabold py-3 rounded-xl mx-auto block">
+                Log in
+              </button>
+            </Link>
+          )}
         </div>
       </div>
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import EnablerNavbar from "../../components/auth/EnablerNavbar";
 import Toast from "../../components/common/Toast";
+import * as api from "../../services/api";
 
 const CreateOpportunity = () => {
   const navigate = useNavigate();
@@ -34,13 +35,11 @@ const CreateOpportunity = () => {
     }
   };
 
-  const handlePost = () => {
-    // Save opportunity data in format compatible with OpportunityDetails
-    const opportunities = JSON.parse(localStorage.getItem('enablerOpportunities') || '[]');
+  const handlePost = async () => {
     const newOpportunity = {
       id: Date.now().toString(),
       title: formData.title,
-      company: "Tech Innovators", // Default company name
+      company: "Tech Innovators",
       type: "Volunteering",
       description: formData.description,
       responsibilities: formData.requirements.split('\n').filter(r => r.trim() !== ''),
@@ -53,12 +52,22 @@ const CreateOpportunity = () => {
       timeCommitment: formData.timeCommitment,
       createdAt: new Date().toISOString(),
     };
+    const opportunities = JSON.parse(localStorage.getItem('enablerOpportunities') || '[]');
     opportunities.push(newOpportunity);
     localStorage.setItem('enablerOpportunities', JSON.stringify(opportunities));
-    
+
+    try {
+      await api.bookmark.opportunitiesCreate({
+        title: formData.title,
+        description: formData.description,
+        link: formData.location ? `https://afrivate.com/opportunity/${formData.location}` : 'https://afrivate.com',
+        is_open: true,
+      });
+    } catch (_) {}
+
     setToast({ isOpen: true, message: "Opportunity posted successfully!", type: "success" });
     setTimeout(() => {
-      navigate('/enabler/dashboard'); // Navigate to enabler dashboard
+      navigate('/enabler/dashboard');
     }, 1500);
   };
 

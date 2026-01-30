@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Input from '../../components/common/Input';
-import Google from '../../../src/Assets/pngwing.com(10) 1.png';
+import api, { getApiErrorMessage } from '../../services/api';
+import { GoogleAuthButton } from '../../components/auth/GoogleAuthButton';
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -96,42 +97,30 @@ const SignUp = () => {
     setServerError('');
   
     try {
-      const response = await fetch('https://afrivate-backend-test.onrender.com/api/auth/register/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          first_name: formData.firstName || "User",
-          last_name: formData.lastName || " ",
-          password: formData.password,
-          password2: formData.confirmPassword,
-          role: formData.userType === "freelancer" ? "enabler" : "pathfinder",
-        }),
+      const role = formData.userType === "freelancer" ? "enabler" : "pathfinder";
+      await api.auth.register({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        password2: formData.confirmPassword,
+        role,
       });
   
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.detail || 'Signup failed');
-      }
+      api.setRole(role);
+      try {
+        const tokenData = await api.auth.token({ email: formData.email, password: formData.password });
+        if (tokenData.access) api.setTokens(tokenData.access, tokenData.refresh);
+      } catch (_) {}
   
-      console.log('✅ Signup successful:', data);
-      // Mark that user needs to complete profile
       localStorage.setItem('hasCompletedProfile', 'false');
-      // Redirect based on user type
-      if (formData.userType === "freelancer") {
-        // Enabler - redirect to enabler profile setup
+      if (role === "enabler") {
         localStorage.setItem('hasCompletedEnablerProfile', 'false');
         navigate('/enabler/profile-setup');
       } else {
-        // Pathfinder - redirect to pathfinder profile setup
         navigate('/edit-new-profile');
       }
     } catch (err) {
-      console.error('❌ Signup error:', err.message);
-      setServerError(err.message);
+      setServerError(getApiErrorMessage(err) || 'Signup failed');
     } finally {
       setLoading(false);
     }
@@ -151,9 +140,15 @@ const SignUp = () => {
           </p>
         </div>
 
-        <div className="flex bg-white mb-3 w-full  text-[#45005A] font-bold text-lg py-4 rounded-[15px] ">
-      <img src={Google} alt="Google logo" className="w-[22px] h-[22px] mx-2 ml-2 mt-1" /> Signup with Google <i class="fas fa-solid fa-arrow-right ml-6 mt-1"></i>
-      </div>
+        <div className="mb-3 w-full">
+          <GoogleAuthButton
+            mode="signup"
+            role={formData.userType === 'employer' ? 'enabler' : 'pathfinder'}
+            buttonText="Sign up with Google"
+            onError={setServerError}
+            className="flex justify-center"
+          />
+        </div>
 
       <div className="relative mx-2 mb-5">
               <div className="absolute inset-0 flex items-center">

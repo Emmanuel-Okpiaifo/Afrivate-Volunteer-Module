@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import EnablerNavbar from "../../components/auth/EnablerNavbar";
+import * as api from "../../services/api";
 
 const defaultCompanyData = {
   name: "TECH INNOVATORS",
@@ -53,12 +54,38 @@ function buildCompanyDataFromEnablerProfile(profile) {
   };
 }
 
+function mapApiEnablerToProfile(data) {
+  if (!data) return null;
+  const base = data.base_details || {};
+  return {
+    name: data.name,
+    bio: base.bio,
+    profilePictureDataUrl: base.profile_pic,
+    email: base.contact_email,
+    country: base.country,
+    state: base.state,
+    phoneNumber: base.phone_number,
+    website: base.website,
+    address: base.address,
+    employees: base.employees,
+    role: base.role,
+    createdAt: base.created_at,
+  };
+}
+
 const EnablerProfile = () => {
   const navigate = useNavigate();
   const [companyData, setCompanyData] = useState(defaultCompanyData);
 
-  useEffect(() => {
-    document.title = "Enabler Profile - AfriVate";
+  const loadProfile = useCallback(async () => {
+    try {
+      const data = await api.profile.enablerGet();
+      const profile = mapApiEnablerToProfile(data);
+      if (profile) {
+        setCompanyData(buildCompanyDataFromEnablerProfile(profile));
+        return;
+      }
+    } catch (_) {}
     try {
       const saved = localStorage.getItem("enablerProfile");
       if (saved) {
@@ -69,6 +96,11 @@ const EnablerProfile = () => {
       console.error("Error loading enabler profile:", e);
     }
   }, []);
+
+  useEffect(() => {
+    document.title = "Enabler Profile - AfriVate";
+    loadProfile();
+  }, [loadProfile]);
 
   return (
     <div className="min-h-screen bg-white font-sans">

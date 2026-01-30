@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import EnablerNavbar from "../../components/auth/EnablerNavbar";
 import Toast from "../../components/common/Toast";
+import * as api from "../../services/api";
 
 const EditProfile = () => {
   const navigate = useNavigate();
@@ -21,8 +22,25 @@ const EditProfile = () => {
   const [profilePhotoUrl, setProfilePhotoUrl] = useState("");
   const [toast, setToast] = useState({ isOpen: false, message: "", type: "success" });
 
-  useEffect(() => {
-    document.title = "Edit Profile - AfriVate";
+  const loadProfile = useCallback(async () => {
+    try {
+      const data = await api.profile.enablerGet();
+      const base = data.base_details || {};
+      setFormData({
+        name: data.name ?? "",
+        country: base.country ?? "",
+        email: base.contact_email ?? "",
+        state: base.state ?? "",
+        phoneNumber: base.phone_number ?? "",
+        address: base.address ?? "",
+        website: base.website ?? "",
+        employees: base.employees ?? "",
+        role: base.role ?? "",
+        bio: base.bio ?? "",
+      });
+      setProfilePhotoUrl(base.profile_pic || "");
+      return;
+    } catch (_) {}
     try {
       const saved = localStorage.getItem("enablerProfile");
       if (saved) {
@@ -46,6 +64,11 @@ const EditProfile = () => {
     }
   }, []);
 
+  useEffect(() => {
+    document.title = "Edit Profile - AfriVate";
+    loadProfile();
+  }, [loadProfile]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -59,7 +82,7 @@ const EditProfile = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
       const existing = JSON.parse(localStorage.getItem("enablerProfile") || "{}");
       const updated = {
@@ -69,6 +92,25 @@ const EditProfile = () => {
         updatedAt: new Date().toISOString(),
       };
       localStorage.setItem("enablerProfile", JSON.stringify(updated));
+
+      try {
+        const base_details = {
+          bio: formData.bio || "",
+          country: formData.country || "",
+          contact_email: formData.email || "",
+          phone_number: formData.phoneNumber || "",
+          website: formData.website || "",
+          address: formData.address || "",
+          state: formData.state || "",
+          city: "",
+        };
+        await api.profile.enablerUpdate({
+          name: formData.name || "Enabler",
+          base_details,
+          social_links: [],
+        });
+      } catch (_) {}
+
       setToast({ isOpen: true, message: "Profile updated successfully!", type: "success" });
       setTimeout(() => navigate("/enabler/profile"), 1200);
     } catch (e) {

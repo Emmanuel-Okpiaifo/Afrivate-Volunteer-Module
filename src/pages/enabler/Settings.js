@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import EnablerNavbar from "../../components/auth/EnablerNavbar";
 import Modal from "../../components/common/Modal";
 import Toast from "../../components/common/Toast";
+import * as api from "../../services/api";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -29,8 +30,23 @@ const Settings = () => {
   const [deleteModal, setDeleteModal] = useState({ isOpen: false });
   const [toast, setToast] = useState({ isOpen: false, message: "", type: "success" });
 
-  // Load enabler profile from localStorage on mount
-  useEffect(() => {
+  const loadProfile = useCallback(async () => {
+    try {
+      const data = await api.profile.enablerGet();
+      const base = data.base_details || {};
+      setFormData((prev) => ({
+        ...prev,
+        fullName: data.name ?? prev.fullName,
+        email: base.contact_email ?? prev.email,
+        phoneNumber: base.phone_number ?? prev.phoneNumber,
+        location: base.address ?? base.country ?? prev.location,
+        bio: base.bio ?? prev.bio,
+        website: base.website ?? prev.website,
+      }));
+      setProfilePhotoUrl(base.profile_pic || "");
+      setCompanyName((data.name || "TECH INNOVATORS").toUpperCase());
+      return;
+    } catch (_) {}
     try {
       const saved = localStorage.getItem("enablerProfile");
       if (saved) {
@@ -51,6 +67,10 @@ const Settings = () => {
       console.error("Error loading enabler profile:", e);
     }
   }, []);
+
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -89,7 +109,7 @@ const Settings = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
       const existing = JSON.parse(localStorage.getItem("enablerProfile") || "{}");
       const updated = {
@@ -105,6 +125,20 @@ const Settings = () => {
       };
       localStorage.setItem("enablerProfile", JSON.stringify(updated));
       setCompanyName((updated.name || "TECH INNOVATORS").toUpperCase());
+
+      try {
+        await api.profile.enablerPatch({
+          name: formData.fullName.trim() || existing.name,
+          base_details: {
+            bio: formData.bio.trim() || "",
+            contact_email: formData.email.trim() || "",
+            phone_number: formData.phoneNumber.trim() || "",
+            website: formData.website.trim() || "",
+            address: formData.location.trim() || "",
+          },
+        });
+      } catch (_) {}
+
       setToast({ isOpen: true, message: "Changes saved successfully!", type: "success" });
     } catch (e) {
       setToast({ isOpen: true, message: "Failed to save. Try again.", type: "error" });
